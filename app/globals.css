@@ -19,8 +19,60 @@
   }
 }
 
+.font-anton {
+  font-family: var(--font-anton);
+}
+
+.font-inter {
+  font-family: var(--font-inter);
+}
+
 body {
-  background: var(--background);
+  @apply bg-white text-gray-900;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+/* PARALLAX EFFECT */
+.parallax-bg {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(0);
+  will-change: transform;
+  height: 120%; /* extra height for vertical parallax shift */
+}
+
+.parallax-bg img {
+  animation: parallaxScroll 30s linear infinite;
+  object-fit: cover;
+}
+
+/* subtle, continuous slow parallax */
+@keyframes parallaxScroll {
+  0% {
+    transform: translateY(-5%);
+  }
+  50% {
+    transform: translateY(5%);
+  }
+  100% {
+    transform: translateY(-5%);
+  }
+}
+
+/* Text fade-up animation */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-fadeUp {
+  animation: fadeUp 2.2s ease-out forwards;
 }

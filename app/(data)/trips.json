@@ -1,0 +1,82 @@
+[{
+  "id": "horseshoe-basin-pasayten",
+  "slug": "horseshoe-basin",
+  "title": "Horseshoe Basin Wilderness Retreat",
+  "tagline": "A remote alpine journey to the edge of the American–Canadian border.",
+  "dates": "Mid–Late June (Exact dates TBA)",
+  "startDate": "2026-06-11",
+  "endDate": "2026-06-14",
+  "durationDays": 4,
+
+  "location": "Pasayten Wilderness, Washington",
+  "difficulty": "Beginner to Intermediate",
+
+  "bannerImage": "/tripBanners/horseShoeBasin.jpeg",
+
+  "status": "closed",
+
+  "summary": "A deep wilderness retreat into one of the most remote and beautiful alpine basins in Washington State.",
+
+  "highlights": [
+    "Backpack to the edge of the American–Canadian border",
+    "Explore vast open alpine basins and surrounding ridgelines",
+    "Views of snow-capped Canadian peaks and warm summer valleys",
+    "Swim in pristine alpine lakes",
+    "Hike along mountain spines with sweeping views",
+    "Experience some of the darkest night skies in Washington",
+    "Prayer, dhikr, and spiritual reflection in nature"
+  ],
+
+  "stargazing": {
+    "title": "Night Under the Stars",
+    "description": "Far from any light pollution, Horseshoe Basin offers extraordinary dark skies. With a new moon during our trip window, we expect incredible views of the Milky Way and summer constellations. An optional late-night experience invites participants to wake around 1:30 AM for stargazing, followed by Qiyam al-Layl, a short spiritual reminder, and witnessing the sky brighten as Fajr enters."
+  },
+
+  "dailyRhythm": [
+    "Morning: Fajr prayer, reflection, breakfast",
+    "Day: Hiking, exploration, learning, and rest",
+    "Afternoon: Lakes, journaling, personal time",
+    "Evening: Camp, Maghrib, dhikr, group discussions",
+    "Night: Optional stargazing and Qiyam al-Layl"
+  ],
+
+  "leadership": {
+    "outdoorLeads": [
+      {
+        "name": "Yassine El Yacoubi",
+        "role": "Trip Lead",
+        "image": "/yassine.jpg",
+        "bio": "Founder of Sakina Wilderness, WFR (Wilderness First Responder) certified outdoor leader, and science educator. Trained under NOLS-certified wilderness instructors, Yassine is passionate about backpacking, exploration, and helping people reconnect with nature as an amanah — a trust to protect and preserve the land through stewardship and respect."
+      },
+      {
+        "name": "Mubasheer",
+        "role": "Assistant Trip Lead",
+        "image": "/images/instructors/mubasheer.jpg",
+        "bio": "Assistant outdoor leader supporting navigation, group management, and camp life throughout the journey. Bio to be updated."
+      }
+    ],
+    "spiritualLeads": [
+      {
+        "name": "NS Azimi",
+        "role": "Spiritual Guide (Tentative)",
+        "image": "/images/instructors/ns-azimi.jpg",
+        "bio": "Bio to be announced."
+      }
+    ]
+  },
+
+  "whoItsFor": [
+    "Adults 18+ seeking a spiritually grounded wilderness experience",
+    "Beginner-friendly with good fitness and willingness to challenge oneself",
+    "Those new to backpacking who want guidance and support",
+    "Experienced hikers seeking deeper reflection and purpose in nature",
+    "Participants open to group rhythm, prayer, and shared reflection"
+  ],
+
+  "safety": [
+    "Wilderness First Responder (WFR) certified trip lead",
+    "Small group travel with experienced leaders",
+    "Conservative pacing and risk-aware decision making",
+    "Emphasis on preparation, communication, and group care"
+  ]
+}]
