@@ -1,7 +1,12 @@
 // app/components/Navbar.tsx
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 md:px-10 lg:px-20 py-3">
@@ -29,12 +34,21 @@ export default function Navbar() {
             Media
           </Link>
 
-          <Link
-            href="/signup"
-            className="px-4 py-2 rounded-full bg-green-700 text-white hover:bg-green-800 transition"
-          >
-            Sign up
-          </Link>
+          {user ? (
+            <Link
+              href="/account"
+              className="px-4 py-2 rounded-full bg-green-700 text-white hover:bg-green-800 transition"
+            >
+              My profile
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-full bg-green-700 text-white hover:bg-green-800 transition"
+            >
+              Log in
+            </Link>
+          )}
         </div>
       </nav>
     </header>

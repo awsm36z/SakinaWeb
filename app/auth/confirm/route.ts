@@ -14,6 +14,15 @@ export async function GET(request: NextRequest) {
       token_hash,
     })
     if (!error) {
+      const { data: userData } = await supabase.auth.getUser()
+      if (userData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({ id: userData.user.id }, { onConflict: 'id' })
+        if (profileError) {
+          redirect('/auth/auth-code-error')
+        }
+      }
       // redirect user to specified redirect URL or root of app
       redirect(next)
     }
