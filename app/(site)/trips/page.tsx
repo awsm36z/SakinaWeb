@@ -1,13 +1,12 @@
-import tripsData from "@/app/(data)/trips.json";
 import TripCard from "@/app/components/tripcard/tripcard";
-import { Trip } from "@/app/types/trip";
 import Link from "next/link";
 import { isAdmin } from "@/lib/roles";
-
-const trips = tripsData as Trip[];
+import { getTrips } from "@/lib/trips";
 
 export default async function TripsPage() {
+  const trips = await getTrips();
   const canCreate = await isAdmin();
+  console.log(trips)
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-20">
@@ -29,15 +28,15 @@ export default async function TripsPage() {
         {trips.map((trip) => (
           <TripCard
             key={trip.id}
-            slug={trip.slug}
+            trip_id={trip.trip_id}
             title={trip.title}
             dates={trip.dates}
-            location={trip.location}
-            durationDays={trip.durationDays}
-            difficulty={trip.difficulty}
-            bannerImage={trip.bannerImage}
+            location={trip.location ?? "TBD"}
+            durationDays={trip.duration_days ?? 0}
+            difficulty="TBD"
+            bannerImage={trip.banner_image ?? ""}
             summary={trip.summary}
-            status={trip.status}
+            status={trip.status ?? "closed"}
           />
         ))}
       </div>

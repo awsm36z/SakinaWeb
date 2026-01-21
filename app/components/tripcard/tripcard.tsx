@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 type TripCardProps = {
-  slug: string;
+  trip_id: string;
   title: string;
   dates: string;
   location: string;
@@ -11,10 +11,11 @@ type TripCardProps = {
   bannerImage: string;
   summary: string;
   status: "waitlist" | "open" | "full" | "closed";
+  
 };
 
 export default function TripCard({
-  slug,
+  trip_id,
   title,
   dates,
   location,
@@ -26,7 +27,7 @@ export default function TripCard({
 }: TripCardProps) {
   return (
     <Link
-      href={`/trips/${slug}`}
+      href={`/trips/${trip_id}`}
       className="group block rounded-2xl bg-white shadow-md hover:shadow-xl transition-shadow duration-300"
     >
       {/* Banner */}
