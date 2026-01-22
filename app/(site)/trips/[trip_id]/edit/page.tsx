@@ -1,7 +1,14 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
-import { getTripById, updateTripById } from "@/lib/trips";
+import {
+  getTripById,
+  getTripInstructors,
+  updateTripById,
+  updateTripInstructors,
+} from "@/lib/trips";
+import StatusField from "@/app/components/dropdown/status-field";
+import InstructorsEditor from "@/app/components/trips/instructors-editor";
 
 type Props = {
   params: Promise<{ trip_id: string }>;
@@ -48,6 +55,7 @@ async function updateTripAction(formData: FormData) {
     end_date: endDate,
     duration_days: durationDays,
     location: String(formData.get("location") ?? "") || null,
+    fee: formData.get("fee") ? Number(formData.get("fee")) : null,
     status: String(formData.get("status") ?? "closed"),
     summary: String(formData.get("summary") ?? "") || null,
     highlights: String(formData.get("highlights") ?? "")
@@ -56,7 +64,6 @@ async function updateTripAction(formData: FormData) {
       .filter(Boolean),
   };
 
-  console.log("Updating trip with payload:", payload);
 
   const bannerFile = formData.get("banner_image_file");
   const { error } = await updateTripById(
@@ -68,6 +75,18 @@ async function updateTripAction(formData: FormData) {
 
   if (error) {
     redirect(`/trips/${tripId}?error=update_failed`);
+  }
+
+  const instructorIds = formData.getAll("instructor_ids").map(String);
+  const instructorRoles = formData.getAll("instructor_roles").map(String);
+  const assignments = instructorIds.map((id, index) => ({
+    instructor_id: id,
+    instructor_role: instructorRoles[index] || null,
+  }));
+
+  const instructorsResult = await updateTripInstructors(tripId, assignments);
+  if (instructorsResult.error) {
+    redirect(`/trips/${tripId}?error=instructors_update_failed`);
   }
 
   redirect(`/trips/${tripId}`);
@@ -89,9 +108,31 @@ export default async function EditTripPage({ params }: Props) {
   }
 
   const trip = await getTripById(tripId);
+  const instructors = await getTripInstructors(tripId);
   if (!trip) {
     redirect("/trips");
   }
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, name_first, name_last, avatar_url, Capacity")
+    .order("name_first", { ascending: true });
+
+  const instructorOptions = (profiles ?? []).map((profile) => ({
+    label:
+      [profile.name_first, profile.name_last].filter(Boolean).join(" ") ||
+      profile.id,
+    value: profile.id,
+    avatar_url: profile.avatar_url ?? null,
+    capacity: profile.Capacity ?? null,
+  }));
+
+  const initialAssignments = instructors
+    .filter((item) => item.profile)
+    .map((item) => ({
+      instructor_id: item.profile!.id,
+      instructor_role: item.instructor_role ?? "",
+    }));
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
@@ -136,6 +177,17 @@ export default async function EditTripPage({ params }: Props) {
               <input
                 name="location"
                 defaultValue={trip.location ?? ""}
+                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="block text-sm font-medium text-gray-700">
+              Fee (USD)
+              <input
+                type="number"
+                name="fee"
+                step="0.01"
+                min="0"
+                defaultValue={trip.fee ?? ""}
                 className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
               />
             </label>
@@ -194,19 +246,10 @@ export default async function EditTripPage({ params }: Props) {
                 />
               </div>
             </label>
-            <label className="block text-sm font-medium text-gray-700">
-              Status
-              <select
-                name="status"
-                defaultValue={trip.status ?? "closed"}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option value="open">Open</option>
-                <option value="waitlist">Waitlist</option>
-                <option value="full">Full</option>
-                <option value="closed">Closed</option>
-              </select>
-            </label>
+            <StatusField
+              name="status"
+              defaultValue={trip.status ?? "closed"}
+            />
           </div>
 
           <label className="block text-sm font-medium text-gray-700">
@@ -228,6 +271,11 @@ export default async function EditTripPage({ params }: Props) {
               className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
             />
           </label>
+
+          <InstructorsEditor
+            options={instructorOptions}
+            initialAssignments={initialAssignments}
+          />
 
           <div className="flex items-center gap-4">
             <button

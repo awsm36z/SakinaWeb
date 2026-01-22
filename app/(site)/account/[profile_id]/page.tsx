@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { updateProfileAction } from "./actions";
 
@@ -10,6 +10,8 @@ const badges = ["Trail Ready", "Community Builder", "Prayer Leader"];
 const completedTrips = ["Goat Rocks Weekend", "Alpine Lakes Reflection", "Olympic Coast Trek"];
 
 export default function AccountPage() {
+  const params = useParams();
+  const profileId = String(params.profile_id ?? "");
   const [about, setAbout] = useState(
     "Outdoor enthusiast who loves grounding trips with reflection and community."
   );
@@ -31,23 +33,22 @@ export default function AccountPage() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
+  const [canEdit, setCanEdit] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
     const loadProfile = async () => {
       const supabase = createClient();
-      const { data: authData, error: authError } =
-        await supabase.auth.getUser();
-
-      if (authError || !authData.user || !isMounted) {
-        return;
-      }
+      const { data: authData } = await supabase.auth.getUser();
+      const authedUserId = authData.user?.id ?? null;
+      if (!isMounted) return;
+      setCanEdit(Boolean(authedUserId && authedUserId === profileId));
 
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", authData.user.id)
+        .eq("id", profileId)
         .single();
 
       if (error || !data || !isMounted) {
@@ -66,7 +67,7 @@ export default function AccountPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [profileId]);
 
   const startEditing = () => {
     setDraftAbout(about);
@@ -215,7 +216,7 @@ export default function AccountPage() {
                   Cancel
                 </button>
               </>
-            ) : (
+            ) : canEdit ? (
               <button
                 type="button"
                 onClick={startEditing}
@@ -223,15 +224,17 @@ export default function AccountPage() {
               >
                 Edit profile
               </button>
-            )}
-            <button
-              type="button"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isSigningOut ? "Signing out..." : "Sign out"}
-            </button>
+            ) : null}
+            {canEdit ? (
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isSigningOut ? "Signing out..." : "Sign out"}
+              </button>
+            ) : null}
           </div>
         </header>
 
