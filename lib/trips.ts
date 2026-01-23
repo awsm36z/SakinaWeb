@@ -224,7 +224,8 @@ export async function createTripApplication(
   tripId: string,
   submission: Record<string, string>,
   camperId: string,
-  paid: boolean = false
+  paid: boolean = false,
+  paymentId?: string | null
 ): Promise<{ error: string | null }> {
   const supabase = await createClient();
   const { error } = await supabase.from("trip_applications").insert({
@@ -232,6 +233,7 @@ export async function createTripApplication(
     submission,
     paid,
     camper_id: camperId,
+    payment_id: paymentId ?? null,
   });
 
   if (error) {
@@ -247,6 +249,7 @@ export type TripApplication = {
   camper_id: string;
   submission: Record<string, string>;
   paid: boolean;
+  payment_id: string | null;
   created_at: string;
 };
 
