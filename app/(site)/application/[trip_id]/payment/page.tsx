@@ -7,6 +7,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import convertToSubcurrency from "@/lib/convertToSubcurrency";
 import PaymentCard from "@/app/components/payment_card/payment_card";
 import { submitTripApplication } from "../actions";
+import { createClient } from "@/lib/supabase/client";
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error("Missing NEXT_PUBLIC_STRIPE_PUBLIC_KEY environment variable");
@@ -23,6 +24,7 @@ export default function PaymentPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [amount, setAmount] = useState<number | null>(null);
+  const [tripTitle, setTripTitle] = useState<string | null>(null);
   const storageKey = `tripApplication:${tripId}`;
 
   useEffect(() => {
@@ -34,6 +36,35 @@ export default function PaymentPage() {
       setAmount(null);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!tripId) {
+      setTripTitle(null);
+      return;
+    }
+
+    let isActive = true;
+    const fetchTripTitle = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("trips")
+        .select("title")
+        .eq("trip_id", tripId)
+        .maybeSingle();
+
+      if (!isActive) {
+        return;
+      }
+
+      setTripTitle(data?.title ?? null);
+    };
+
+    fetchTripTitle();
+
+    return () => {
+      isActive = false;
+    };
+  }, [tripId]);
 
   useEffect(() => {
     if (!amount) {
@@ -122,6 +153,16 @@ export default function PaymentPage() {
         </header>
 
         <div className="rounded-2xl border border-gray-200 bg-white/95 p-6 shadow-xl backdrop-blur">
+          <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+            Checkout for{" "}
+            <span className="font-semibold text-gray-900">
+              {tripTitle ?? "this trip"}
+            </span>
+            . Your Total comes to:{" "}
+            <span className="font-semibold text-gray-900">
+              {amount !== null ? `$${amount.toFixed(2)}` : "TBD"}
+            </span>
+          </div>
           <button
             type="button"
             onClick={() => router.push(`/application/${tripId}`)}
