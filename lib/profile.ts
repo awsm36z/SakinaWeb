@@ -42,6 +42,7 @@ export async function updateUserProfile(
         name_last: string | null;
         name_middle: string | null;
         avatar_url?: string | null;
+        Capacity?: string | null;
     }
 ) {
     const supabase = await createClient();

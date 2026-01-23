@@ -2,14 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 
 type TripCardProps = {
-  trip_id: string;
-  title: string;
-  dates: string;
-  location: string;
-  durationDays: number;
-  difficulty: string;
-  bannerImage: string;
-  summary: string;
+  trip_id: string | null;
+  title: string | null;
+  dates: string | null;
+  location: string | null;
+  durationDays: number | null;
+  difficulty: string | null;
+  bannerImage: string | null;
+  summary: string | null;
   status: "waitlist" | "open" | "full" | "closed";
   
 };
@@ -33,8 +33,8 @@ export default function TripCard({
       {/* Banner */}
       <div className="relative h-56 w-full overflow-hidden rounded-t-2xl">
         <Image
-          src={bannerImage}
-          alt={title}
+          src={bannerImage? bannerImage : "/default-trip-banner.jpg"}
+          alt={title? title : "Trip Banner"}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />

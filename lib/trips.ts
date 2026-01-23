@@ -157,18 +157,24 @@ export async function getTripInstructors(
     return [];
   }
 
-  return data.map((item) => ({
-    instructor_role: item.instructor_role ?? null,
-    profile: item.profiles
-      ? {
-          id: item.profiles.id,
-          name_first: item.profiles.name_first ?? null,
-          name_last: item.profiles.name_last ?? null,
-          avatar_url: item.profiles.avatar_url ?? null,
-          Capacity: item.profiles.Capacity ?? null,
-        }
-      : null,
-  }));
+  return data.map((item) => {
+    const profile = Array.isArray(item.profiles)
+      ? item.profiles[0]
+      : item.profiles;
+
+    return {
+      instructor_role: item.instructor_role ?? null,
+      profile: profile
+        ? {
+            id: profile.id,
+            name_first: profile.name_first ?? null,
+            name_last: profile.name_last ?? null,
+            avatar_url: profile.avatar_url ?? null,
+            Capacity: profile.Capacity ?? null,
+          }
+        : null,
+    };
+  });
 
   console.log("mapped Data:", data); // --- IGNORE ---
 }

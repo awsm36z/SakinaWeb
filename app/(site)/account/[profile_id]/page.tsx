@@ -19,12 +19,13 @@ export default function AccountPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [middleInitial, setMiddleInitial] = useState("");
-  const [capacity] = useState("Member");
+  const [capacity, setCapacity] = useState("Member");
   const [isEditing, setIsEditing] = useState(false);
   const [draftAbout, setDraftAbout] = useState(about);
   const [draftFirstName, setDraftFirstName] = useState(firstName);
   const [draftLastName, setDraftLastName] = useState(lastName);
   const [draftMiddleInitial, setDraftMiddleInitial] = useState(middleInitial);
+  const [draftCapacity, setDraftCapacity] = useState(capacity);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [draftImageUrl, setDraftImageUrl] = useState(profileImageUrl);
   const [draftImageFile, setDraftImageFile] = useState<File | null>(null);
@@ -34,6 +35,7 @@ export default function AccountPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const [canEdit, setCanEdit] = useState(false);
+  const [canEditCapacity, setCanEditCapacity] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -43,7 +45,7 @@ export default function AccountPage() {
       const { data: authData } = await supabase.auth.getUser();
       const authedUserId = authData.user?.id ?? null;
       if (!isMounted) return;
-      setCanEdit(Boolean(authedUserId && authedUserId === profileId));
+      const isOwner = Boolean(authedUserId && authedUserId === profileId);
 
       const { data, error } = await supabase
         .from("profiles")
@@ -58,8 +60,24 @@ export default function AccountPage() {
       setFirstName(data.name_first || "");
       setLastName(data.name_last || "");
       setMiddleInitial(data.name_middle || "");
+      setCapacity(data.Capacity || "Member");
       setAbout(data.bio_text || "");
       setProfileImageUrl(data.avatar_url || null);
+
+      if (authedUserId) {
+        const { data: roleProfile } = await supabase
+          .from("profiles")
+          .select("Capacity")
+          .eq("id", authedUserId)
+          .single();
+        const role = roleProfile?.Capacity?.toLowerCase?.() ?? "";
+        const isAdmin = role === "admin" || role === "founder";
+        setCanEditCapacity(isAdmin);
+        setCanEdit(isOwner || isAdmin);
+      } else {
+        setCanEditCapacity(false);
+        setCanEdit(false);
+      }
     };
 
     loadProfile();
@@ -74,6 +92,7 @@ export default function AccountPage() {
     setDraftFirstName(firstName);
     setDraftLastName(lastName);
     setDraftMiddleInitial(middleInitial);
+    setDraftCapacity(capacity);
     setDraftImageUrl(profileImageUrl);
     setIsEditing(true);
   };
@@ -83,6 +102,7 @@ export default function AccountPage() {
     setDraftFirstName(firstName);
     setDraftLastName(lastName);
     setDraftMiddleInitial(middleInitial);
+    setDraftCapacity(capacity);
     setDraftImageUrl(profileImageUrl);
     setDraftImageFile(null);
     setIsEditing(false);
@@ -138,12 +158,13 @@ export default function AccountPage() {
         nextAvatarUrl = publicUrlData.publicUrl;
       }
 
-      const result = await updateProfileAction({
+      const result = await updateProfileAction(profileId, {
         bio_text: draftAbout,
         name_first: draftFirstName,
         name_last: draftLastName || null,
         name_middle: draftMiddleInitial || null,
         avatar_url: nextAvatarUrl,
+        Capacity: canEditCapacity ? draftCapacity : undefined,
       });
       if (result?.error) {
         setSaveError(result.error);
@@ -154,6 +175,7 @@ export default function AccountPage() {
       setFirstName(draftFirstName);
       setLastName(draftLastName);
       setMiddleInitial(draftMiddleInitial);
+      setCapacity(draftCapacity);
       if (nextAvatarUrl) {
         setProfileImageUrl(nextAvatarUrl);
       } else {
@@ -335,9 +357,25 @@ export default function AccountPage() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-green-700">
                   Capacity
                 </p>
-                <div className="mt-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
-                  <p className="text-sm font-medium text-gray-900">{capacity}</p>
-                </div>
+                {canEditCapacity && isEditing ? (
+                  <select
+                    value={draftCapacity}
+                    onChange={(e) => setDraftCapacity(e.target.value)}
+                    className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                  >
+                    <option value="Member">Member</option>
+                    <option value="Spiritual Leader">Spiritual Leader</option>
+                    <option value="Wilderness Leader">Wilderness Leader</option>
+                    <option value="Founder">Founder</option>
+                    <option value="Leader in Training">Leader in Training</option>
+                    <option value="Guest Expert">Guest Expert</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                ) : (
+                  <div className="mt-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+                    <p className="text-sm font-medium text-gray-900">{capacity}</p>
+                  </div>
+                )}
                 <p className="mt-2 text-xs text-gray-500">
                   Capacity is managed by admins.
                 </p>

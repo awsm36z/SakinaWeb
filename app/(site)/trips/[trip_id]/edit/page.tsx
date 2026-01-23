@@ -56,12 +56,13 @@ async function updateTripAction(formData: FormData) {
     duration_days: durationDays,
     location: String(formData.get("location") ?? "") || null,
     fee: formData.get("fee") ? Number(formData.get("fee")) : null,
-    status: String(formData.get("status") ?? "closed"),
+    status: (String(formData.get("status") ?? "closed") as "closed" | "waitlist" | "open" | "full"),
     summary: String(formData.get("summary") ?? "") || null,
     highlights: String(formData.get("highlights") ?? "")
       .split("\n")
       .map((item) => item.trim())
       .filter(Boolean),
+    banner_image: null,
   };
 
 
