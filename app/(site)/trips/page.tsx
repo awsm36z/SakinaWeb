@@ -6,7 +6,7 @@ import { getTrips } from "@/lib/trips";
 export default async function TripsPage() {
   const trips = await getTrips();
   const canCreate = await isAdmin();
-  console.log(trips)
+
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-20">
