@@ -18,7 +18,7 @@ export default function SignupPage() {
     setSuccess(false);
 
     const supabase = createClient();
-    const redirectTo = `${window.location.origin}/account`;
+    const redirectTo = `${window.location.origin}/login`;
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,

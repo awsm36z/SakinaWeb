@@ -36,7 +36,7 @@ export default async function Navbar() {
 
           {user ? (
             <Link
-              href="/account"
+              href={`/account/${user.id}`}
               className="px-4 py-2 rounded-full bg-green-700 text-white hover:bg-green-800 transition"
             >
               My profile
