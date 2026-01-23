@@ -9,7 +9,7 @@ type StatusFieldProps = {
 };
 
 export default function StatusField({ name, defaultValue }: StatusFieldProps) {
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState<string>(defaultValue);
 
   return (
     <div>
@@ -22,7 +22,7 @@ export default function StatusField({ name, defaultValue }: StatusFieldProps) {
           { label: "Closed", value: "closed" },
         ]}
         value={value}
-        onChange={setValue}
+        onChange={(nextValue) => setValue(nextValue)}
       />
       <input type="hidden" name={name} value={value} />
     </div>
