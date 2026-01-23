@@ -5,7 +5,8 @@ import { createTripApplication } from "@/lib/trips";
 
 export async function submitTripApplication(
   tripId: string,
-  submission: Record<string, string>
+  submission: Record<string, string>,
+  paymentId: string
 ) {
   const supabase = await createClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -18,7 +19,8 @@ export async function submitTripApplication(
     tripId,
     submission,
     authData.user.id,
-    false
+    true,
+    paymentId
   );
 
   return { error };

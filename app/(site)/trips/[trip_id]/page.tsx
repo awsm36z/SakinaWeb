@@ -16,11 +16,21 @@ export default async function TripDetailPage({ params }: Props) {
     const supabase = await createClient();
     const { data: authData } = await supabase.auth.getUser();
     const userId = authData.user?.id ?? "";
+    const { data: existingApplication } = userId
+        ? await supabase
+              .from("trip_applications")
+              .select("form_id")
+              .eq("trip_id", tripId)
+              .eq("camper_id", userId)
+              .maybeSingle()
+        : { data: null };
     const canEdit = await isAdmin();
     const canViewApplications =
         canEdit || (userId ? await isTripInstructor(tripId, userId) : false);
     if (!trip) notFound();
     const highlights = trip.highlights ?? [];
+    const isClosed = trip.status?.toLowerCase() === "closed";
+    const hasApplied = Boolean(existingApplication);
 
     return (
         <div>
@@ -198,13 +208,21 @@ export default async function TripDetailPage({ params }: Props) {
                             </div>
                         </div>
 
-                        {trip.status?.toLowerCase() === "closed" ? (
+                        {isClosed ? (
                             <button
                                 type="button"
                                 disabled
                                 className="mt-6 w-full cursor-not-allowed rounded-xl bg-gray-300 px-6 py-3 text-sm font-semibold text-gray-600"
                             >
                                 Sign Up Now
+                            </button>
+                        ) : hasApplied ? (
+                            <button
+                                type="button"
+                                disabled
+                                className="mt-6 w-full cursor-not-allowed rounded-xl bg-gray-300 px-6 py-3 text-sm font-semibold text-gray-600"
+                            >
+                                Already signed up!
                             </button>
                         ) : (
                             <Link
