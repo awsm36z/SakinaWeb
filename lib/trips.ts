@@ -176,7 +176,6 @@ export async function getTripInstructors(
     };
   });
 
-  console.log("mapped Data:", data); // --- IGNORE ---
 }
 
 export type TripInstructorAssignment = {
@@ -312,7 +311,6 @@ export async function getTripApplicationById(
     applicationId: string
 ) {
     const supabase = await createClient();
-    console.log("\n\n\ntrip Id:", tripId, "applicationId:", applicationId); // --- IGNORE ---
     const { data, error } = await supabase
         .from("trip_applications")
         .select("*")

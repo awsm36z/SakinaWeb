@@ -12,7 +12,7 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
   const supabase = await createClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
 
-console.log("\n\n\nsubmission_id", submission_id);
+
   if (authError || !authData.user) {
     redirect("/login");
   }

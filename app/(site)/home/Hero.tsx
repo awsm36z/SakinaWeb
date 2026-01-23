@@ -25,7 +25,7 @@ export default function Hero() {
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/signup"
+            href="/trips"
             className="px-8 py-3 rounded-lg bg-green-700 text-white font-semibold hover:bg-green-800 transition"
           >
             Sign up for the next trip
