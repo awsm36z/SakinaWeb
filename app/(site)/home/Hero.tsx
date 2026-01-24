@@ -32,10 +32,10 @@ export default function Hero() {
           </Link>
 
           <Link
-            href="/trips"
+            href="/about-us"
             className="px-8 py-3 rounded-lg border border-green-700 text-green-700 font-semibold hover:bg-green-50 transition"
           >
-            View upcoming trips
+            Learn what we do
           </Link>
         </div>
       </div>
