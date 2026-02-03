@@ -242,6 +242,22 @@ export async function createTripApplication(
   return { error: null };
 }
 
+export async function updateTripApplicationPaidByPaymentId(
+  paymentId: string
+): Promise<{ error: string | null }> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("trip_applications")
+    .update({ paid: true })
+    .eq("payment_id", paymentId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { error: null };
+}
+
 export type TripApplication = {
   id: string;
   trip_id: string;
