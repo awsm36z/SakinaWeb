@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +17,12 @@ export default function SignupPage() {
     setSubmitting(true);
     setError(null);
     setSuccess(false);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setSubmitting(false);
+      return;
+    }
 
     const supabase = createClient();
     const redirectTo = `${window.location.origin}/login`;
@@ -85,6 +92,19 @@ export default function SignupPage() {
               <span className="mt-2 block text-xs text-gray-500">
                 Use at least 6 characters.
               </span>
+            </label>
+
+            <label className="block text-sm font-medium text-gray-700">
+              Re-enter password
+              <input
+                type="password"
+                required
+                autoComplete="new-password"
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-700"
+              />
             </label>
 
             {error ? (

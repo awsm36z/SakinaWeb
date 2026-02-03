@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { updateProfileAction } from "./actions";
+import AlertModal from "@/app/components/modal/alert-modal";
 
 const badges = ["Trail Ready", "Community Builder", "Prayer Leader"];
 const completedTrips = ["Goat Rocks Weekend", "Alpine Lakes Reflection", "Olympic Coast Trek"];
@@ -36,6 +37,9 @@ export default function AccountPage() {
   const router = useRouter();
   const [canEdit, setCanEdit] = useState(false);
   const [canEditCapacity, setCanEditCapacity] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [showProfileReminder, setShowProfileReminder] = useState(false);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     let isMounted = true;
@@ -63,6 +67,7 @@ export default function AccountPage() {
       setCapacity(data.Capacity || "Member");
       setAbout(data.bio_text || "");
       setProfileImageUrl(data.avatar_url || null);
+      setProfileLoaded(true);
 
       if (authedUserId) {
         const { data: roleProfile } = await supabase
@@ -86,6 +91,17 @@ export default function AccountPage() {
       isMounted = false;
     };
   }, [profileId]);
+
+  useEffect(() => {
+    if (!profileLoaded) {
+      return;
+    }
+
+    if (searchParams.get("edit") === "1") {
+      startEditing();
+      setShowProfileReminder(true);
+    }
+  }, [profileLoaded, searchParams]);
 
   const startEditing = () => {
     setDraftAbout(about);
@@ -205,6 +221,14 @@ export default function AccountPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
+      <AlertModal
+        isOpen={showProfileReminder}
+        onClose={() => setShowProfileReminder(false)}
+        title="Complete your profile"
+        message="Make sure to add your name and upload a profile picture!"
+        confirmLabel="Got it"
+        onConfirm={() => setShowProfileReminder(false)}
+      />
       <div className="mx-auto max-w-6xl space-y-10">
         <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
