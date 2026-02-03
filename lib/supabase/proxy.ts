@@ -1,7 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const PROFILE_REQUIRED_EXCLUSIONS = [
+  "/login",
+  "/signup",
+  "/auth",
+  "/account",
+  "/api",
+]
+
 export async function updateSession(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  if (PROFILE_REQUIRED_EXCLUSIONS.some((prefix) => pathname.startsWith(prefix))) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -51,6 +64,26 @@ export async function updateSession(request: NextRequest) {
   //    return myNewResponse
   // If this is not done, you may be causing the browser and server to go out
   // of sync and terminate the user's session prematurely!
+
+  if (user?.sub) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("name_first, name_last")
+      .eq("id", user.sub)
+      .maybeSingle()
+
+    const missingName = !profile?.name_first || !profile?.name_last
+    if (missingName) {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = `/account/${user.sub}`
+      redirectUrl.searchParams.set("edit", "1")
+      const redirectResponse = NextResponse.redirect(redirectUrl)
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie)
+      })
+      return redirectResponse
+    }
+  }
 
   return supabaseResponse
 }
