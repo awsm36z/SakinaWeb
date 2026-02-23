@@ -233,6 +233,14 @@ export default async function TripDetailPage({ params }: Props) {
                                         : "TBD"}
                                 </p>
                             </div>
+                            <div className="rounded-xl bg-gray-50 px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-green-700">
+                                    Spots Left
+                                </p>
+                                <p className="mt-1 text-sm font-medium text-gray-900">
+                                    {trip.spots_left ?? 0}
+                                </p>
+                            </div>
                         </div>
 
                         {isClosed ? (

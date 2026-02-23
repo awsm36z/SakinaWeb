@@ -57,6 +57,9 @@ async function createTripAction(formData: FormData) {
     duration_days: durationDays,
     location: String(formData.get("location") ?? "") || null,
     fee: formData.get("fee") ? Number(formData.get("fee")) : null,
+    max_capacity: formData.get("max_capacity")
+      ? Number(formData.get("max_capacity"))
+      : null,
     status: String(formData.get("status") ?? "closed") as
       | "closed"
       | "waitlist"
@@ -163,7 +166,7 @@ export default async function CreateTripPage() {
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <label className="block text-sm font-medium text-gray-700">
               Location
               <input
@@ -178,6 +181,16 @@ export default async function CreateTripPage() {
                 name="fee"
                 step="0.01"
                 min="0"
+                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="block text-sm font-medium text-gray-700">
+              Maximum spots
+              <input
+                type="number"
+                name="max_capacity"
+                min="0"
+                step="1"
                 className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
               />
             </label>

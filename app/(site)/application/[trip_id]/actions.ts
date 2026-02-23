@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createTripApplication } from "@/lib/trips";
+import { triggerTripRegistrationEmail } from "@/lib/emails";
 
 export async function submitTripApplication(
   tripId: string,
@@ -22,6 +23,24 @@ export async function submitTripApplication(
     true,
     paymentId
   );
+
+  if (!error && authData.user.email) {
+    const { data: trip } = await supabase
+      .from("trips")
+      .select("title, trip_id")
+      .eq("trip_id", tripId)
+      .maybeSingle();
+
+    const emailResult = await triggerTripRegistrationEmail({
+      recipientEmail: authData.user.email,
+      tripTitle: trip?.title ?? "your trip",
+      tripId: trip?.trip_id ?? tripId,
+    });
+
+    if (emailResult.error) {
+      console.error("Trip registration email error:", emailResult.error);
+    }
+  }
 
   return { error };
 }
