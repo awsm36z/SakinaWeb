@@ -11,7 +11,7 @@ type TripCardProps = {
   bannerImage: string | null;
   summary: string | null;
   status: "waitlist" | "open" | "full" | "closed";
-  
+  spotsLeft: number;
 };
 
 export default function TripCard({
@@ -24,6 +24,7 @@ export default function TripCard({
   bannerImage,
   summary,
   status,
+  spotsLeft,
 }: TripCardProps) {
   return (
     <Link
@@ -77,6 +78,7 @@ export default function TripCard({
           <p>
             {durationDays} days · {difficulty}
           </p>
+          <p className="font-semibold text-green-700">Spots left: {spotsLeft}</p>
         </div>
 
         {/* Short description */}

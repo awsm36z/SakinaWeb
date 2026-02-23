@@ -37,6 +37,7 @@ export default async function TripsPage() {
             bannerImage={trip.banner_image ?? ""}
             summary={trip.summary}
             status={trip.status ?? "closed"}
+            spotsLeft={trip.spots_left ?? 0}
           />
         ))}
       </div>

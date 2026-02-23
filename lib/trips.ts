@@ -12,14 +12,19 @@ export type TripRow = {
   duration_days: number | null;
   location: string | null;
   fee: number | null;
+  max_capacity: number | null;
   banner_image: string | null;
   status: "waitlist" | "open" | "full" | "closed" | null;
   summary: string | null;
   highlights: string[] | null;
+  spots_left?: number;
   trip_instructors?: TripInstructor[];
 };
 
-export type TripUpdatePayload = Omit<TripRow, "id" | "trip_id" | "slug"> & {
+export type TripUpdatePayload = Omit<
+  TripRow,
+  "id" | "trip_id" | "slug" | "max_capacity" | "spots_left"
+> & {
   banner_image?: string | null;
   status: "waitlist" | "open" | "full" | "closed";
   highlights: string[];
@@ -30,7 +35,7 @@ export async function getTrips(): Promise<TripRow[]> {
   const { data, error } = await supabase
     .from("trips")
     .select(
-      "id, trip_id, slug, title, tagline, dates, start_date, end_date, duration_days, location, fee, banner_image, status, summary, highlights"
+      "id, trip_id, slug, title, tagline, dates, start_date, end_date, duration_days, location, fee, max_capacity, banner_image, status, summary, highlights"
     )
     .order("start_date", { ascending: true });
 
@@ -39,7 +44,34 @@ export async function getTrips(): Promise<TripRow[]> {
     return [];
   }
 
-  return data as TripRow[];
+  const tripIds = data.map((trip) => trip.trip_id);
+  const paidCountByTripId = new Map<string, number>();
+
+  if (tripIds.length) {
+    const { data: paidApplications, error: paidError } = await supabase
+      .from("trip_applications")
+      .select("trip_id")
+      .in("trip_id", tripIds)
+      .eq("paid", true);
+
+    if (paidError) {
+      console.error("getTrips paid count error:", paidError);
+    } else {
+      for (const application of paidApplications ?? []) {
+        const tripId = String(application.trip_id ?? "");
+        paidCountByTripId.set(tripId, (paidCountByTripId.get(tripId) ?? 0) + 1);
+      }
+    }
+  }
+
+  return (data as TripRow[]).map((trip) => {
+    const paidCount = paidCountByTripId.get(trip.trip_id) ?? 0;
+    const effectiveCapacity = trip.max_capacity ?? 0;
+    return {
+      ...trip,
+      spots_left: Math.max(0, effectiveCapacity - paidCount),
+    };
+  });
 }
 
 export async function getTripById(tripId: string): Promise<TripRow | null> {
@@ -47,7 +79,7 @@ export async function getTripById(tripId: string): Promise<TripRow | null> {
   const { data, error } = await supabase
     .from("trips")
     .select(
-      "id, trip_id, slug, title, tagline, dates, start_date, end_date, duration_days, location, fee, banner_image, status, summary, highlights"
+      "id, trip_id, slug, title, tagline, dates, start_date, end_date, duration_days, location, fee, max_capacity, banner_image, status, summary, highlights"
     )
     .eq("trip_id", tripId)
     .maybeSingle();
@@ -57,7 +89,24 @@ export async function getTripById(tripId: string): Promise<TripRow | null> {
     return null;
   }
 
-  return data as TripRow;
+  const { count, error: paidError } = await supabase
+    .from("trip_applications")
+    .select("form_id", { count: "exact", head: true })
+    .eq("trip_id", tripId)
+    .eq("paid", true);
+
+  if (paidError) {
+    console.error("getTripById paid count error:", paidError, "tripId:", tripId);
+  }
+
+  const paidCount = count ?? 0;
+  const trip = data as TripRow;
+  const effectiveCapacity = trip.max_capacity ?? 0;
+
+  return {
+    ...trip,
+    spots_left: Math.max(0, effectiveCapacity - paidCount),
+  };
 }
 
 export async function updateTripById(
