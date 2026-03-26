@@ -31,10 +31,10 @@ export default function AddMediaPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
+    <main className="brand-shell px-6 md:px-10 lg:px-20">
       <div className="mx-auto max-w-3xl space-y-8">
         <header className="text-center space-y-3">
-          <p className="text-xs font-semibold tracking-[0.3em] text-green-700 uppercase">
+          <p className="brand-kicker">
             Media
           </p>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -45,12 +45,12 @@ export default function AddMediaPage() {
           </p>
         </header>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8 space-y-4">
+        <div className="brand-panel rounded-[1.75rem] p-6 md:p-8 space-y-4">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="w-full rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-100 disabled:opacity-60"
+            className="w-full rounded-xl border border-dashed border-[var(--border-soft)] bg-[rgba(255,250,241,0.72)] px-4 py-6 text-sm font-semibold text-gray-700 transition hover:bg-white/70 disabled:opacity-60"
           >
             {isUploading ? "Uploading..." : "Click to upload photos"}
           </button>
@@ -64,7 +64,7 @@ export default function AddMediaPage() {
           />
 
           {successCount > 0 ? (
-            <p className="text-sm text-green-700">
+            <p className="text-sm text-[var(--brand-moss)]">
               Uploaded {successCount} file{successCount === 1 ? "" : "s"}.
             </p>
           ) : null}
@@ -73,7 +73,7 @@ export default function AddMediaPage() {
           <div className="text-center">
             <Link
               href="/media"
-              className="text-sm font-semibold text-gray-600 hover:text-gray-900"
+              className="brand-link text-sm"
             >
               Back to media
             </Link>

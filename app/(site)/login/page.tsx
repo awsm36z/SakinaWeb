@@ -35,15 +35,15 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center px-6 md:px-10 lg:px-20 bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden">
+    <section className="relative flex min-h-[calc(100vh-5rem)] items-center justify-center overflow-hidden px-6 md:px-10 lg:px-20">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-green-100/70 blur-3xl" />
-        <div className="absolute -bottom-28 -left-16 h-80 w-80 rounded-full bg-amber-100/60 blur-3xl" />
+        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[rgba(47,93,80,0.12)] blur-3xl" />
+        <div className="absolute -bottom-28 -left-16 h-80 w-80 rounded-full bg-[rgba(184,138,82,0.16)] blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white/90 p-8 shadow-xl backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-2xl sm:p-10">
+      <div className="brand-panel-strong relative w-full max-w-md rounded-[1.75rem] p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(67,49,31,0.14)] sm:p-10">
         <div className="mb-8 text-center">
-          <p className="text-xs font-semibold tracking-[0.3em] text-green-700">
+          <p className="brand-kicker">
             SAKINA
           </p>
           <h1 className="mt-3 text-3xl font-bold text-gray-900">
@@ -64,7 +64,7 @@ export default function LoginPage() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="brand-input mt-2 px-4 py-3"
             />
           </label>
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
               placeholder="Your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="brand-input mt-2 px-4 py-3"
             />
           </label>
 
@@ -86,7 +86,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-xl bg-green-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-70"
+            className="brand-button w-full rounded-xl px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-70"
           >
             {submitting ? "Signing in..." : "Sign in"}
           </button>
@@ -96,7 +96,7 @@ export default function LoginPage() {
           New here?{" "}
           <Link
             href="/signup"
-            className="font-semibold text-green-700 hover:text-green-800"
+            className="brand-link"
           >
             Sign up
           </Link>

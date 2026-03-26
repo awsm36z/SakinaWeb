@@ -25,7 +25,7 @@ export default function AlertModal({
       <button
         type="button"
         onClick={onConfirm}
-        className="mt-4 w-full rounded-xl bg-green-700 px-4 py-3 text-sm font-semibold text-white hover:bg-green-800 transition"
+        className="brand-button mt-4 w-full rounded-xl px-4 py-3 text-sm"
       >
         {confirmLabel}
       </button>

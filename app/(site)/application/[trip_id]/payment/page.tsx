@@ -138,10 +138,10 @@ export default function PaymentPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
+    <main className="brand-shell px-6 md:px-10 lg:px-20">
       <div className="mx-auto max-w-3xl space-y-8">
         <header className="text-center">
-          <p className="text-xs font-semibold tracking-[0.3em] text-green-700">
+          <p className="brand-kicker">
             PAYMENT
           </p>
           <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900">
@@ -152,8 +152,8 @@ export default function PaymentPage() {
           </p>
         </header>
 
-        <div className="rounded-2xl border border-gray-200 bg-white/95 p-6 shadow-xl backdrop-blur">
-          <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+        <div className="brand-panel-strong rounded-[1.75rem] p-6">
+          <div className="brand-subtle-block mb-4 px-4 py-3 text-sm text-gray-700">
             Checkout for{" "}
             <span className="font-semibold text-gray-900">
               {tripTitle ?? "this trip"}
@@ -166,7 +166,7 @@ export default function PaymentPage() {
           <button
             type="button"
             onClick={() => router.push(`/application/${tripId}`)}
-            className="mb-4 rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition"
+            className="brand-button-secondary mb-4 px-4 py-2 text-sm"
           >
             Back to form
           </button>

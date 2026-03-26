@@ -50,7 +50,7 @@ export default function SubmissionForm({
 }: SubmissionFormProps) {
   return (
     <div
-      className={`rounded-2xl border border-gray-200 bg-white/95 p-6 shadow-xl backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${className ?? ""}`}
+      className={`brand-card-soft rounded-[1.75rem] p-6 backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(67,49,31,0.14)] ${className ?? ""}`}
     >
       {title ? (
         <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
@@ -70,14 +70,14 @@ export default function SubmissionForm({
                 placeholder={field.placeholder}
                 defaultValue={field.defaultValue as string | undefined}
                 rows={5}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="brand-input mt-2 px-4 py-3 text-sm"
               />
             ) : field.type === "select" ? (
               <select
                 name={field.name}
                 required={field.required}
                 defaultValue={field.defaultValue as string | undefined}
-                className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="brand-input mt-2 px-4 py-3 text-sm"
               >
                 <option value="" disabled>
                   {field.placeholder ?? "Select an option"}
@@ -99,7 +99,7 @@ export default function SubmissionForm({
                 max={field.max}
                 step={field.step}
                 accept={field.accept}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="brand-input mt-2 px-4 py-3 text-sm"
               />
             )}
             {field.helperText ? (
@@ -112,7 +112,7 @@ export default function SubmissionForm({
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-green-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-800"
+          className="brand-button w-full rounded-xl px-4 py-3 text-sm"
         >
           {submitLabel}
         </button>

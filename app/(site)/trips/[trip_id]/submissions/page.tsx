@@ -42,10 +42,10 @@ export default async function TripSubmissionsIndexPage({ params }: Props) {
   );
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
+    <main className="brand-shell px-6 md:px-10 lg:px-20">
       <div className="mx-auto max-w-5xl space-y-6">
         <header>
-          <p className="text-xs font-semibold tracking-[0.3em] text-green-700">
+          <p className="brand-kicker">
             APPLICATIONS
           </p>
           <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900">
@@ -62,7 +62,7 @@ export default async function TripSubmissionsIndexPage({ params }: Props) {
               <Link
                 key={application.form_id}
                 href={`/trips/${tripId}/submissions/${application.form_id}`}
-                className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="brand-panel rounded-2xl p-6 transition hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(67,49,31,0.12)]"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -74,7 +74,7 @@ export default async function TripSubmissionsIndexPage({ params }: Props) {
                       Submitted {new Date(application.created_at).toLocaleString()}
                     </p>
                   </div>
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                  <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
                     {application.paid ? "Paid" : "Unpaid"}
                   </span>
                 </div>
@@ -82,7 +82,7 @@ export default async function TripSubmissionsIndexPage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
+          <div className="rounded-2xl border border-dashed border-[var(--border-soft)] bg-[rgba(255,250,241,0.72)] p-8 text-center text-sm text-gray-500">
             No applications submitted yet.
           </div>
         )}

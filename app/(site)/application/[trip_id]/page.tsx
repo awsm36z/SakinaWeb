@@ -95,10 +95,10 @@ export default function ApplicationPage() {
   }, [step, totalSteps]);
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
+    <main className="brand-shell px-6 md:px-10 lg:px-20">
       <div className="mx-auto max-w-4xl space-y-10">
         <header className="text-center">
-          <p className="text-xs font-semibold tracking-[0.3em] text-green-700">
+          <p className="brand-kicker">
             APPLICATION
           </p>
           <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900">
@@ -108,7 +108,7 @@ export default function ApplicationPage() {
             Please complete all sections below. Your responses help us build a
             safe and meaningful experience.
           </p>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-green-700">
+          <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
             {progressLabel}
           </p>
         </header>
@@ -174,7 +174,7 @@ export default function ApplicationPage() {
             type="button"
             onClick={() => setStep((prev) => Math.max(0, prev - 1))}
             disabled={step === 0}
-            className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition disabled:cursor-not-allowed disabled:opacity-60"
+            className="brand-button-secondary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             Back
           </button>

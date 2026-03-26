@@ -97,10 +97,10 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
+    <main className="brand-shell px-6 md:px-10 lg:px-20">
       <div className="mx-auto max-w-5xl space-y-6">
         <header>
-          <p className="text-xs font-semibold tracking-[0.3em] text-green-700">
+          <p className="brand-kicker">
             APPLICATION
           </p>
           <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900">
@@ -111,7 +111,7 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
           </p>
         </header>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="brand-panel rounded-2xl p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-gray-900">
@@ -121,7 +121,7 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
                 Submitted {new Date(application.created_at).toLocaleString()}
               </p>
             </div>
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+            <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
               {application.paid ? "Paid" : "Unpaid"}
             </span>
           </div>
@@ -147,9 +147,9 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
                       {entries.map(([key, value]) => (
                         <div
                           key={key}
-                          className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                          className="brand-subtle-block px-4 py-3"
                         >
-                          <p className="text-xs font-semibold uppercase tracking-wider text-green-700">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
                             {formatLabel(key)}
                           </p>
                           <p className="mt-2 text-sm text-gray-900">

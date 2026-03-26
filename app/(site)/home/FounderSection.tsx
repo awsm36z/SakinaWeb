@@ -3,11 +3,12 @@ import Image from "next/image";
 
 export default function FounderSection() {
   return (
-    <section className="bg-white py-20 px-6 md:px-10 lg:px-20">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <section className="px-6 py-20 md:px-10 lg:px-20">
+      <div className="brand-panel mx-auto grid max-w-5xl items-center gap-12 rounded-[2rem] p-8 md:grid-cols-2 md:p-12">
 
         {/* Text */}
         <div>
+          <p className="brand-kicker mb-4">Founder</p>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
             About the Founder
           </h2>
@@ -28,7 +29,7 @@ export default function FounderSection() {
             alt="Yassine El Yacoubi, founder of Sakina Wilderness"
             width={320}
             height={320}
-            className="rounded-xl shadow-lg object-cover"
+            className="rounded-[1.5rem] border border-[var(--border-soft)] object-cover shadow-lg"
           />
         </div>
 
