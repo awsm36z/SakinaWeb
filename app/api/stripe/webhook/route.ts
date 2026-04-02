@@ -11,6 +11,8 @@ if (!webhookSecret) {
   throw new Error("Missing STRIPE_WEBHOOK_SECRET environment variable");
 }
 
+const stripeWebhookSecret: string = webhookSecret;
+
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const subscriptionDetails = invoice.parent?.subscription_details;
   const subscriptionId =
@@ -69,7 +71,7 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    event = stripe.webhooks.constructEvent(body, signature, stripeWebhookSecret);
   } catch (error) {
     console.error("Stripe webhook signature error:", error);
     return NextResponse.json(
