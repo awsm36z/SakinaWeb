@@ -69,7 +69,7 @@ export default function CustomDropdown({
   return (
     <div ref={wrapperRef} className={className}>
       {label ? (
-        <p className="text-xs font-semibold uppercase tracking-wider text-green-700">
+        <p className="brand-kicker">
           {label}
         </p>
       ) : null}
@@ -84,7 +84,7 @@ export default function CustomDropdown({
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
           disabled={disabled}
-          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700 disabled:cursor-not-allowed disabled:bg-gray-100"
+          className="brand-input px-4 py-3 text-sm disabled:cursor-not-allowed disabled:bg-[#ece4d6]"
         />
         <button
           type="button"
@@ -99,7 +99,7 @@ export default function CustomDropdown({
         </button>
 
         {isOpen ? (
-          <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+          <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[rgba(255,250,241,0.96)] shadow-lg backdrop-blur">
             {filteredOptions.length ? (
               <ul className="max-h-56 overflow-y-auto py-1 text-sm text-gray-700">
                 {filteredOptions.map((option) => (
@@ -107,7 +107,7 @@ export default function CustomDropdown({
                     <button
                       type="button"
                       onClick={() => handleSelect(option)}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-100"
+                      className="w-full px-4 py-2 text-left transition hover:bg-[rgba(47,93,80,0.08)]"
                     >
                       {option.label}
                     </button>

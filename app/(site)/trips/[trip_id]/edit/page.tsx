@@ -136,8 +136,8 @@ export default async function EditTripPage({ params }: Props) {
     }));
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
-      <div className="mx-auto max-w-4xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+    <main className="brand-shell px-6 md:px-10 lg:px-20">
+      <div className="brand-panel mx-auto max-w-4xl rounded-2xl p-8">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold text-gray-900">Edit Trip</h1>
           <p className="text-sm text-gray-600">
@@ -159,7 +159,7 @@ export default async function EditTripPage({ params }: Props) {
               <input
                 name="title"
                 defaultValue={trip.title}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
@@ -167,7 +167,7 @@ export default async function EditTripPage({ params }: Props) {
               <input
                 name="tagline"
                 defaultValue={trip.tagline ?? ""}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
           </div>
@@ -178,7 +178,7 @@ export default async function EditTripPage({ params }: Props) {
               <input
                 name="location"
                 defaultValue={trip.location ?? ""}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
@@ -189,7 +189,7 @@ export default async function EditTripPage({ params }: Props) {
                 step="0.01"
                 min="0"
                 defaultValue={trip.fee ?? ""}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
           </div>
@@ -201,7 +201,7 @@ export default async function EditTripPage({ params }: Props) {
                 type="date"
                 name="start_date"
                 defaultValue={trip.start_date ?? ""}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
@@ -210,11 +210,11 @@ export default async function EditTripPage({ params }: Props) {
                 type="date"
                 name="end_date"
                 defaultValue={trip.end_date ?? ""}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-              <p className="text-xs font-semibold uppercase tracking-wider text-green-700">
+            <div className="brand-subtle-block px-4 py-3 text-sm text-gray-600">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
                 Auto fields
               </p>
               <p className="mt-2">
@@ -229,7 +229,7 @@ export default async function EditTripPage({ params }: Props) {
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-gray-700">
               Banner image
-              <div className="mt-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div className="brand-subtle-block mt-2 p-4">
                 {trip.banner_image ? (
                   <img
                     src={trip.banner_image}
@@ -259,7 +259,7 @@ export default async function EditTripPage({ params }: Props) {
               name="summary"
               defaultValue={trip.summary ?? ""}
               rows={5}
-              className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+              className="brand-input mt-2 px-3 py-2 text-sm"
             />
           </label>
 
@@ -269,7 +269,7 @@ export default async function EditTripPage({ params }: Props) {
               name="highlights"
               defaultValue={(trip.highlights ?? []).join("\n")}
               rows={6}
-              className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+              className="brand-input mt-2 px-3 py-2 text-sm"
             />
           </label>
 
@@ -281,13 +281,13 @@ export default async function EditTripPage({ params }: Props) {
           <div className="flex items-center gap-4">
             <button
               type="submit"
-              className="rounded-xl bg-green-700 px-6 py-3 text-sm font-semibold text-white hover:bg-green-800 transition"
+              className="brand-button rounded-xl px-6 py-3 text-sm"
             >
               Save changes
             </button>
             <a
               href={`/trips/${trip.trip_id}`}
-              className="text-sm font-semibold text-gray-600 hover:text-gray-900"
+              className="brand-link text-sm"
             >
               Cancel
             </a>

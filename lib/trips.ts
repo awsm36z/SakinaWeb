@@ -307,6 +307,61 @@ export async function updateTripApplicationPaidByPaymentId(
   return { error: null };
 }
 
+export async function updateTripApplicationInstallmentProgressByPaymentId(
+  paymentId: string,
+  progress: {
+    paidCount: number;
+    targetCount: number;
+    status: "active" | "completed";
+    lastPaidAt: string;
+  }
+): Promise<{ error: string | null }> {
+  const supabase = await createClient();
+  const { data: existingApplication, error: fetchError } = await supabase
+    .from("trip_applications")
+    .select("submission")
+    .eq("payment_id", paymentId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return { error: fetchError.message };
+  }
+
+  if (!existingApplication) {
+    return { error: null };
+  }
+
+  const currentSubmission =
+    existingApplication.submission &&
+    typeof existingApplication.submission === "object" &&
+    !Array.isArray(existingApplication.submission)
+      ? (existingApplication.submission as Record<string, string>)
+      : {};
+
+  const nextSubmission: Record<string, string> = {
+    ...currentSubmission,
+    payment_plan: "installments",
+    installment_paid_count: String(progress.paidCount),
+    installment_target_count: String(progress.targetCount),
+    installment_status: progress.status,
+    installment_last_paid_at: progress.lastPaidAt,
+  };
+
+  const { error: updateError } = await supabase
+    .from("trip_applications")
+    .update({
+      submission: nextSubmission,
+      paid: progress.status === "completed",
+    })
+    .eq("payment_id", paymentId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  return { error: null };
+}
+
 export type TripApplication = {
   id: string;
   trip_id: string;

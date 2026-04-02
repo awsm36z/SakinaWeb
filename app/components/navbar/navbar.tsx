@@ -1,55 +1,34 @@
 // app/components/Navbar.tsx
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/roles";
+import NavLinks from "./nav-links";
 
 export default async function Navbar() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
+  const userIsAdmin = user ? await isAdmin(user.id) : false;
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 md:px-10 lg:px-20 py-3">
+    <header className="fixed inset-x-0 top-5 z-50 px-4 md:px-6">
+      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between rounded-full border border-white/45 bg-[rgba(255,251,245,0.72)] px-6 py-3 shadow-[0_20px_50px_rgba(21,28,39,0.06)] backdrop-blur-xl md:px-8">
         {/* Logo / Brand */}
         <Link href="/" className="flex items-center gap-2">
-          {/* If you add a logo later, it can go here */}
-          <span className="text-sm font-semibold tracking-[0.2em] text-green-700">
-            SAKINA
+          <span className="font-headline text-xl italic text-[var(--brand-moss)] md:text-2xl">
+            Sakina Wilderness
           </span>
         </Link>
 
         {/* Nav links */}
-        <div className="flex items-center gap-6 text-sm font-medium text-gray-700">
-          <Link
-            href="/trips"
-            className="hover:text-gray-900 transition-colors"
-          >
-            Trips
-          </Link>
+        <NavLinks userId={user?.id ?? null} userIsAdmin={userIsAdmin} />
 
-          <Link
-            href="/media"
-            className="hover:text-gray-900 transition-colors"
-          >
-            Media
-          </Link>
-
-          {user ? (
-            <Link
-              href={`/account/${user.id}`}
-              className="px-4 py-2 rounded-full bg-green-700 text-white hover:bg-green-800 transition"
-            >
-              My profile
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="px-4 py-2 rounded-full bg-green-700 text-white hover:bg-green-800 transition"
-            >
-              Log in
-            </Link>
-          )}
-        </div>
+        <Link
+          href={user ? `/account/${user.id}` : "/trips"}
+          className="brand-button px-5 py-2.5 font-inter text-sm"
+        >
+          {user ? "My profile" : "Book Now"}
+        </Link>
       </nav>
     </header>
   );

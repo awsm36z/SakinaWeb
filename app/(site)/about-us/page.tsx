@@ -30,10 +30,10 @@ export default async function AboutUsPage() {
     : { data: null };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
+    <main className="brand-shell px-6 md:px-10 lg:px-20">
       <div className="mx-auto max-w-5xl space-y-12">
         <header className="text-center space-y-4">
-          <p className="text-xs font-semibold tracking-[0.3em] text-green-700 uppercase">
+          <p className="brand-kicker">
             About Us
           </p>
           <h1 className="text-3xl md:text-5xl font-bold text-gray-900">
@@ -46,7 +46,7 @@ export default async function AboutUsPage() {
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="brand-panel rounded-2xl p-6 md:p-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               The Experience
             </h2>
@@ -55,7 +55,7 @@ export default async function AboutUsPage() {
             </p>
             <p className="text-gray-700 leading-relaxed">{experience.type}</p>
           </div>
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="brand-panel rounded-2xl p-6 md:p-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               Safety & Training
             </h2>
@@ -68,12 +68,12 @@ export default async function AboutUsPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+        <section className="brand-panel rounded-2xl p-6 md:p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Founder
           </h2>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-gray-200 bg-gray-100">
+            <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[rgba(255,250,241,0.72)]">
               {founderProfile?.avatar_url ? (
                 <Image
                   src={founderProfile.avatar_url}
@@ -92,7 +92,7 @@ export default async function AboutUsPage() {
           {founder.founder_id ? (
             <Link
               href={`/account/${founder.founder_id}`}
-              className="mt-5 inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-800"
+              className="brand-link mt-5 inline-flex items-center text-sm"
             >
               View founder profile
             </Link>
@@ -100,7 +100,7 @@ export default async function AboutUsPage() {
         </section>
 
         <section className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="brand-panel rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
               What makes us unique?
             </h3>
@@ -111,7 +111,7 @@ export default async function AboutUsPage() {
               {what_makes_us_unique.approach}
             </p>
           </div>
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="brand-panel rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
               Who is it for?
             </h3>
@@ -122,7 +122,7 @@ export default async function AboutUsPage() {
               {target_audience.general}
             </p>
           </div>
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:col-span-2">
+          <div className="brand-panel rounded-2xl p-6 md:col-span-2">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
               FAQ
             </h3>

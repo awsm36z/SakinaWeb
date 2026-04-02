@@ -64,7 +64,7 @@ export default function InstructorsEditor({ options, initialAssignments }: Props
   };
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+    <div className="brand-panel rounded-2xl p-6 md:p-8">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">
         Trip Instructors
       </h2>
@@ -84,10 +84,10 @@ export default function InstructorsEditor({ options, initialAssignments }: Props
             return (
               <div
                 key={assignment.instructor_id}
-                className="group relative flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 sm:flex-row sm:items-center"
+                className="group relative flex flex-col gap-3 rounded-xl border border-[var(--border-soft)] bg-[rgba(255,250,241,0.72)] p-4 sm:flex-row sm:items-center"
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl bg-gray-200" />
+                  <div className="h-12 w-12 rounded-2xl bg-[rgba(216,198,165,0.36)]" />
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{name}</p>
                     {option?.capacity ? (
@@ -109,7 +109,7 @@ export default function InstructorsEditor({ options, initialAssignments }: Props
                 <button
                   type="button"
                   onClick={() => removeInstructor(assignment.instructor_id)}
-                  className="absolute right-3 top-3 rounded-full border border-gray-300 bg-white px-2 py-0.5 text-xs text-gray-600 opacity-0 transition group-hover:opacity-100"
+                  className="absolute right-3 top-3 rounded-full border border-[var(--border-soft)] bg-white/70 px-2 py-0.5 text-xs text-gray-600 opacity-0 transition group-hover:opacity-100"
                 >
                   ×
                 </button>

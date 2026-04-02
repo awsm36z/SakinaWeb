@@ -72,7 +72,7 @@ export default function FieldInputModal({
                 value={values[field.name] ?? ""}
                 onChange={(event) => handleChange(field.name, event.target.value)}
                 rows={4}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="brand-input mt-2 px-4 py-3 text-sm"
               />
             ) : (
               <input
@@ -82,7 +82,7 @@ export default function FieldInputModal({
                 placeholder={field.placeholder}
                 value={values[field.name] ?? ""}
                 onChange={(event) => handleChange(field.name, event.target.value)}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="brand-input mt-2 px-4 py-3 text-sm"
               />
             )}
           </label>
@@ -90,7 +90,7 @@ export default function FieldInputModal({
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-green-700 px-4 py-3 text-sm font-semibold text-white hover:bg-green-800 transition"
+          className="brand-button w-full rounded-xl px-4 py-3 text-sm"
         >
           {confirmLabel}
         </button>

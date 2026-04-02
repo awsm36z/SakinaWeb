@@ -45,8 +45,9 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 md:px-10 lg:px-20 bg-gray-50">
-      <div className="max-w-lg w-full bg-white p-10 rounded-2xl shadow-xl">
+    <main className="flex min-h-screen items-center justify-center px-6 md:px-10 lg:px-20">
+      <div className="brand-panel-strong max-w-lg w-full rounded-[1.75rem] p-10">
+        <p className="brand-kicker mb-4">Sakina</p>
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Sign up</h1>
 
         <p className="text-gray-600 mb-8">
@@ -56,7 +57,7 @@ export default function SignupPage() {
 
         {success ? (
           <div className="text-center py-6">
-            <h2 className="text-xl font-semibold text-green-700">
+            <h2 className="text-xl font-semibold text-[var(--brand-moss)]">
               Check your email to confirm
             </h2>
             <p className="text-gray-600 mt-2">
@@ -74,7 +75,7 @@ export default function SignupPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="brand-input mt-2 px-4 py-3"
               />
             </label>
 
@@ -87,7 +88,7 @@ export default function SignupPage() {
                 placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="brand-input mt-2 px-4 py-3"
               />
               <span className="mt-2 block text-xs text-gray-500">
                 Use at least 6 characters.
@@ -103,7 +104,7 @@ export default function SignupPage() {
                 placeholder="Re-enter your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="brand-input mt-2 px-4 py-3"
               />
             </label>
 
@@ -114,7 +115,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full px-4 py-3 bg-green-700 text-white font-semibold rounded-xl hover:bg-green-800 transition disabled:cursor-not-allowed disabled:opacity-70"
+              className="brand-button w-full rounded-xl px-4 py-3 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {submitting ? "Creating account..." : "Sign up"}
             </button>
@@ -123,7 +124,7 @@ export default function SignupPage() {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-green-700 hover:text-green-800">
+          <Link href="/login" className="brand-link">
             Log in
           </Link>
         </p>

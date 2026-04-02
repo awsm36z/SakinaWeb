@@ -38,7 +38,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         onClick={onClose}
         className="absolute inset-0"
       />
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="brand-panel-strong relative w-full max-w-md rounded-[1.75rem] p-6">
         {title ? (
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
         ) : null}

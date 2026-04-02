@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Anton, Inter } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Anton,
+  Inter,
+  Noto_Serif,
+  Plus_Jakarta_Sans,
+} from "next/font/google";
 import Navbar from "./components/navbar/navbar";
 import "./globals.css";
 
@@ -24,6 +31,16 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const notoSerif = Noto_Serif({
+  subsets: ["latin"],
+  variable: "--font-noto-serif",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+});
+
 export const metadata: Metadata = {
   title: "Sakina Wilderness — Tranquility in nature, together.",
   description:
@@ -37,11 +54,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${anton.variable} ${inter.variable} antialiased bg-white text-gray-900 w-full min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} ${anton.variable} ${inter.variable} ${notoSerif.variable} ${plusJakartaSans.variable} app-shell min-h-screen w-full antialiased text-gray-900`}
       >
         <Navbar />
-        <main className="pt-20 w-full">
+        <main className="w-full pt-20">
           {children}
         </main>
       </body>

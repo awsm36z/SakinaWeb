@@ -21,10 +21,10 @@ export default async function MediaPage() {
     })) ?? [];
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
+    <main className="min-h-screen px-6 py-12 md:px-10 lg:px-20">
       <div className="mx-auto max-w-6xl space-y-12">
         <header className="text-center space-y-3">
-          <p className="text-xs font-semibold tracking-[0.3em] text-green-700 uppercase">
+          <p className="text-xs font-semibold tracking-[0.3em] text-[var(--brand-moss)] uppercase">
             Media
           </p>
           <h1 className="text-3xl md:text-5xl font-bold text-gray-900">
@@ -37,7 +37,7 @@ export default async function MediaPage() {
             <div className="pt-3">
               <Link
                 href="/media/add-media"
-                className="inline-flex items-center rounded-full bg-green-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
+                className="inline-flex items-center rounded-full bg-[var(--brand-moss)] px-5 py-2 text-sm font-semibold text-white transition hover:brightness-95"
               >
                 Add media
               </Link>
@@ -45,11 +45,11 @@ export default async function MediaPage() {
           ) : null}
         </header>
 
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+        <section className="brand-panel rounded-[2rem] p-6 md:p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Latest video
           </h2>
-          <div className="relative w-full aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
+          <div className="relative w-full aspect-video overflow-hidden rounded-[1.5rem] border border-[var(--border-soft)] bg-black shadow-lg">
             <iframe
               src={YOUTUBE_EMBED_URL}
               title="Sakina Wilderness media"
@@ -60,7 +60,7 @@ export default async function MediaPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+        <section className="brand-panel rounded-[2rem] p-6 md:p-8">
           <div className="flex items-center justify-between gap-4 mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">Gallery</h2>
             <span className="text-sm text-gray-500">

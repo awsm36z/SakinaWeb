@@ -29,7 +29,7 @@ export default function TripCard({
   return (
     <Link
       href={`/trips/${trip_id}`}
-      className="group block rounded-2xl bg-white shadow-md hover:shadow-xl transition-shadow duration-300"
+      className="brand-card-soft group block rounded-[1.75rem] transition-shadow duration-300 hover:shadow-[0_24px_60px_rgba(67,49,31,0.14)]"
     >
       {/* Banner */}
       <div className="relative h-56 w-full overflow-hidden rounded-t-2xl">
@@ -47,10 +47,10 @@ export default function TripCard({
               absolute top-4 left-4 text-xs font-semibold px-3 py-1 rounded-full
               ${
                 status === "waitlist"
-                  ? "bg-yellow-100 text-yellow-800"
+                  ? "bg-[rgba(184,138,82,0.14)] text-[#8a6439]"
                   : status === "open"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-200 text-gray-700"
+                  ? "bg-[rgba(47,93,80,0.12)] text-[var(--brand-moss)]"
+                  : "bg-[rgba(92,102,112,0.12)] text-[#5c6670]"
               }
             `}
           >
@@ -66,8 +66,8 @@ export default function TripCard({
       </div>
 
       {/* Content */}
-      <div className="p-6 flex flex-col">
-        <h3 className="text-2xl font-semibold text-gray-900 group-hover:text-green-700 transition-colors">
+      <div className="flex flex-col p-6">
+        <h3 className="text-2xl font-semibold text-gray-900 transition-colors group-hover:text-[var(--brand-moss)]">
           {title}
         </h3>
 
@@ -78,7 +78,7 @@ export default function TripCard({
           <p>
             {durationDays} days · {difficulty}
           </p>
-          <p className="font-semibold text-green-700">Spots left: {spotsLeft}</p>
+          <p className="font-semibold text-[var(--brand-moss)]">Spots left: {spotsLeft}</p>
         </div>
 
         {/* Short description */}
@@ -87,7 +87,7 @@ export default function TripCard({
         </p>
 
         {/* CTA */}
-        <div className="mt-4 text-sm font-semibold text-green-700 group-hover:underline">
+        <div className="mt-4 text-sm font-semibold text-[var(--brand-moss)] group-hover:underline">
           Learn more →
         </div>
       </div>

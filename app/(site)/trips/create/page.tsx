@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { randomUUID } from "crypto";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
 import { updateTripInstructors } from "@/lib/trips";
@@ -139,8 +140,8 @@ export default async function CreateTripPage() {
   }));
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 md:px-10 lg:px-20 py-12">
-      <div className="mx-auto max-w-4xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+    <main className="brand-shell px-6 md:px-10 lg:px-20">
+      <div className="brand-panel mx-auto max-w-4xl rounded-2xl p-8">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold text-gray-900">Create Trip</h1>
           <p className="text-sm text-gray-600">
@@ -154,14 +155,14 @@ export default async function CreateTripPage() {
               Title
               <input
                 name="title"
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
               Tagline
               <input
                 name="tagline"
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
           </div>
@@ -171,7 +172,7 @@ export default async function CreateTripPage() {
               Location
               <input
                 name="location"
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
@@ -181,7 +182,7 @@ export default async function CreateTripPage() {
                 name="fee"
                 step="0.01"
                 min="0"
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
@@ -191,7 +192,7 @@ export default async function CreateTripPage() {
                 name="max_capacity"
                 min="0"
                 step="1"
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
           </div>
@@ -202,7 +203,7 @@ export default async function CreateTripPage() {
               <input
                 type="date"
                 name="start_date"
-                className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
@@ -213,8 +214,8 @@ export default async function CreateTripPage() {
                 className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
               />
             </label>
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-              <p className="text-xs font-semibold uppercase tracking-wider text-green-700">
+            <div className="brand-subtle-block px-4 py-3 text-sm text-gray-600">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
                 Auto fields
               </p>
               <p className="mt-2">Dates: TBD</p>
@@ -225,7 +226,7 @@ export default async function CreateTripPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-gray-700">
               Banner image
-              <div className="mt-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div className="brand-subtle-block mt-2 p-4">
                 <div className="h-40 w-full rounded-lg bg-gray-200" />
                 <input
                   type="file"
@@ -243,7 +244,7 @@ export default async function CreateTripPage() {
             <textarea
               name="summary"
               rows={5}
-              className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+              className="brand-input mt-2 px-3 py-2 text-sm"
             />
           </label>
 
@@ -252,7 +253,7 @@ export default async function CreateTripPage() {
             <textarea
               name="highlights"
               rows={6}
-              className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
+              className="brand-input mt-2 px-3 py-2 text-sm"
             />
           </label>
 
@@ -261,16 +262,13 @@ export default async function CreateTripPage() {
           <div className="flex items-center gap-4">
             <button
               type="submit"
-              className="rounded-xl bg-green-700 px-6 py-3 text-sm font-semibold text-white hover:bg-green-800 transition"
+              className="brand-button rounded-xl px-6 py-3 text-sm"
             >
               Create trip
             </button>
-            <a
-              href="/trips"
-              className="text-sm font-semibold text-gray-600 hover:text-gray-900"
-            >
+            <Link href="/trips" className="brand-link text-sm">
               Cancel
-            </a>
+            </Link>
           </div>
         </form>
       </div>

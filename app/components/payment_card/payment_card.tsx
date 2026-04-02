@@ -61,7 +61,7 @@ const PaymentCard = ({ onSuccess }: PaymentCardProps) => {
       <button
         type="submit"
         disabled={!stripe || isProcessing}
-        className="w-full rounded-xl bg-green-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-800 disabled:opacity-60"
+        className="brand-button w-full rounded-xl px-4 py-3 text-sm disabled:opacity-60"
       >
         {isProcessing ? "Processing..." : "Pay"}
       </button>
