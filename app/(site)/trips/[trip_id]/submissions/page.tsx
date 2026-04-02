@@ -74,9 +74,17 @@ export default async function TripSubmissionsIndexPage({ params }: Props) {
                       Submitted {new Date(application.created_at).toLocaleString()}
                     </p>
                   </div>
-                  <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
-                    {application.paid ? "Paid" : "Unpaid"}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
+                      {application.paid ? "Paid" : "Unpaid"}
+                    </span>
+                    {application.submission?.payment_plan === "installments" ? (
+                      <span className="rounded-full bg-[rgba(47,93,80,0.1)] px-3 py-1 text-xs font-semibold text-[var(--brand-moss)]">
+                        Installments {application.submission?.installment_paid_count ?? "0"}/
+                        {application.submission?.installment_target_count ?? "4"}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               </Link>
             ))}

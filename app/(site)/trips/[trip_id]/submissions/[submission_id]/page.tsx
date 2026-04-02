@@ -46,6 +46,12 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
     value
       .replace(/_/g, " ")
       .replace(/\b\w/g, (match) => match.toUpperCase());
+  const installmentProgress =
+    application.submission?.payment_plan === "installments"
+      ? `${application.submission?.installment_paid_count ?? "0"}/${
+          application.submission?.installment_target_count ?? "4"
+        }`
+      : null;
 
   const sectionFields = {
     personal: [
@@ -112,19 +118,33 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
         </header>
 
         <div className="brand-panel rounded-2xl p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-gray-900">
-                Camper: {camperName}
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  Camper: {camperName}
+                </p>
               <p className="text-xs text-gray-500">
                 Submitted {new Date(application.created_at).toLocaleString()}
               </p>
             </div>
-            <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
-              {application.paid ? "Paid" : "Unpaid"}
-            </span>
-          </div>
+              <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
+                {application.paid ? "Paid" : "Unpaid"}
+              </span>
+            </div>
+
+          {installmentProgress ? (
+            <div className="mt-4 rounded-xl bg-[rgba(47,93,80,0.08)] px-4 py-3 text-sm text-[var(--brand-moss)]">
+              Installment progress: {installmentProgress}
+              {application.submission?.installment_last_paid_at ? (
+                <span className="ml-2 text-[#5f625b]">
+                  · Last payment{" "}
+                  {new Date(
+                    application.submission.installment_last_paid_at
+                  ).toLocaleString()}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="mt-5 space-y-6">
             {[

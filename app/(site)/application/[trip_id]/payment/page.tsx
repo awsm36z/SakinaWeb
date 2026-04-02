@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
@@ -14,32 +14,34 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 }
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+const INSTALLMENT_COUNT = 4;
 
 export default function PaymentPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const tripId = String(params.trip_id ?? "");
+  const amount = useMemo(() => {
+    const amountParam = searchParams.get("amount");
+    const parsedAmount = amountParam ? Number(amountParam) : null;
+    return parsedAmount && Number.isFinite(parsedAmount) ? parsedAmount : null;
+  }, [searchParams]);
+  const requestedPlan = searchParams.get("plan") === "installments"
+    ? "installments"
+    : "full";
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [amount, setAmount] = useState<number | null>(null);
+  const [isLaunchingInstallments, setIsLaunchingInstallments] = useState(false);
   const [tripTitle, setTripTitle] = useState<string | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<"full" | "installments">(
+    requestedPlan
+  );
   const storageKey = `tripApplication:${tripId}`;
 
   useEffect(() => {
-    const amountParam = searchParams.get("amount");
-    const parsedAmount = amountParam ? Number(amountParam) : null;
-    if (parsedAmount && Number.isFinite(parsedAmount)) {
-      setAmount(parsedAmount);
-    } else {
-      setAmount(null);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
     if (!tripId) {
-      setTripTitle(null);
       return;
     }
 
@@ -68,7 +70,6 @@ export default function PaymentPage() {
 
   useEffect(() => {
     if (!amount) {
-      setClientSecret(null);
       return;
     }
 
@@ -101,6 +102,45 @@ export default function PaymentPage() {
       isActive = false;
     };
   }, [amount]);
+
+  const installmentAmount =
+    amount !== null ? amount / INSTALLMENT_COUNT : null;
+  const installmentsAvailable =
+    amount !== null &&
+    Number.isFinite(installmentAmount) &&
+    Number.isInteger(convertToSubcurrency(amount, 100) / INSTALLMENT_COUNT);
+
+  const startInstallmentCheckout = async () => {
+    if (!amount || !tripId) {
+      setCheckoutError("Missing payment amount. Please return to the form.");
+      return;
+    }
+
+    setIsLaunchingInstallments(true);
+    setCheckoutError(null);
+
+    const response = await fetch("/api/create-installment-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: convertToSubcurrency(amount, 100),
+        tripId,
+        tripTitle,
+      }),
+    });
+
+    const data = (await response.json()) as { error?: string; url?: string };
+
+    if (!response.ok || !data.url) {
+      setCheckoutError(
+        data.error ?? "Unable to start installments. Please try again."
+      );
+      setIsLaunchingInstallments(false);
+      return;
+    }
+
+    window.location.href = data.url;
+  };
 
   const handlePaymentSuccess = async (paymentId: string) => {
     if (typeof window === "undefined") {
@@ -163,6 +203,45 @@ export default function PaymentPage() {
               {amount !== null ? `$${amount.toFixed(2)}` : "TBD"}
             </span>
           </div>
+          {amount ? (
+            <div className="mb-6 grid gap-3 md:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setPaymentPlan("full")}
+                className={`rounded-2xl border px-4 py-4 text-left transition ${
+                  paymentPlan === "full"
+                    ? "border-[var(--brand-moss)] bg-[rgba(47,93,80,0.08)]"
+                    : "border-[rgba(114,121,111,0.16)] bg-white/70"
+                }`}
+              >
+                <p className="text-sm font-semibold text-gray-900">Pay in full</p>
+                <p className="mt-1 text-sm text-gray-600">
+                  One charge today for {`$${amount.toFixed(2)}`}.
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentPlan("installments")}
+                disabled={!installmentsAvailable}
+                className={`rounded-2xl border px-4 py-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                  paymentPlan === "installments"
+                    ? "border-[var(--brand-moss)] bg-[rgba(47,93,80,0.08)]"
+                    : "border-[rgba(114,121,111,0.16)] bg-white/70"
+                }`}
+              >
+                <p className="text-sm font-semibold text-gray-900">
+                  Pay deposit now, and complete payments over 2 months
+                </p>
+                <p className="mt-1 text-sm text-gray-600">
+                  {installmentsAvailable && installmentAmount !== null
+                    ? `Pay $${installmentAmount.toFixed(
+                        2
+                      )} today, then 3 more payments every 2 weeks.`
+                    : "Installments unavailable for this amount."}
+                </p>
+              </button>
+            </div>
+          ) : null}
           <button
             type="button"
             onClick={() => router.push(`/application/${tripId}`)}
@@ -176,7 +255,7 @@ export default function PaymentPage() {
             </p>
           ) : null}
 
-          {amount && clientSecret ? (
+          {paymentPlan === "full" && amount && clientSecret ? (
             <Elements
               stripe={stripePromise}
               options={{
@@ -186,8 +265,30 @@ export default function PaymentPage() {
             >
               <PaymentCard onSuccess={handlePaymentSuccess} />
             </Elements>
-          ) : amount ? (
+          ) : paymentPlan === "full" && amount ? (
             <p className="text-sm text-gray-500">Preparing payment...</p>
+          ) : null}
+
+          {paymentPlan === "installments" && amount ? (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Stripe will charge a deposit today, then collect the remaining
+                3 payments every 2 weeks over the next 2 months.
+              </p>
+              <button
+                type="button"
+                onClick={startInstallmentCheckout}
+                disabled={isLaunchingInstallments || !installmentsAvailable}
+                className="brand-button w-full rounded-xl px-4 py-3 text-sm disabled:opacity-60"
+              >
+                {isLaunchingInstallments
+                  ? "Opening Stripe checkout..."
+                  : "Start deposit plan"}
+              </button>
+              {checkoutError ? (
+                <p className="text-sm text-red-600">{checkoutError}</p>
+              ) : null}
+            </div>
           ) : null}
 
           {submitError ? (
