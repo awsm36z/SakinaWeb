@@ -12,10 +12,11 @@ if (!webhookSecret) {
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  const subscriptionDetails = invoice.parent?.subscription_details;
   const subscriptionId =
-    typeof invoice.subscription === "string"
-      ? invoice.subscription
-      : invoice.subscription?.id;
+    typeof subscriptionDetails?.subscription === "string"
+      ? subscriptionDetails.subscription
+      : subscriptionDetails?.subscription?.id;
 
   if (!subscriptionId) {
     return;
