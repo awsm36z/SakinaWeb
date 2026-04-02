@@ -140,7 +140,6 @@ export async function submitInstallmentTripApplication(
         });
         const scheduleAnchor =
           schedule.current_phase?.start_date ??
-          subscriptionObject.current_period_start ??
           Math.floor(Date.now() / 1000);
 
         await stripe.subscriptionSchedules.update(schedule.id, {
