@@ -24,10 +24,10 @@ export default async function Navbar() {
         <NavLinks userId={user?.id ?? null} userIsAdmin={userIsAdmin} />
 
         <Link
-          href={user ? `/account/${user.id}` : "/trips"}
+          href={user ? `/account/${user.id}` : "/signup"}
           className="brand-button px-5 py-2.5 font-inter text-sm"
         >
-          {user ? "My profile" : "Book Now"}
+          {user ? "My profile" : "Join us"}
         </Link>
       </nav>
     </header>

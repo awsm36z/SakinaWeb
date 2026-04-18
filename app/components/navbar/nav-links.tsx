@@ -23,6 +23,7 @@ export default function NavLinks({ userId, userIsAdmin }: Props) {
   const isAbout = pathname === "/about-us";
   const isMedia = pathname === "/media";
   const isBadges = pathname === "/badges";
+  const isContact = pathname === "/contact-us";
   const isProfile =
     Boolean(userId) &&
     (pathname === `/account/${userId}` ||
@@ -46,6 +47,10 @@ export default function NavLinks({ userId, userIsAdmin }: Props) {
         Badges
       </Link>
 
+      <Link href="/contact-us" className={getLinkClasses(isContact)}>
+        Contact us
+      </Link>
+
       {userId ? (
         <Link
           href={userIsAdmin ? "/admin" : `/account/${userId}`}
@@ -53,11 +58,7 @@ export default function NavLinks({ userId, userIsAdmin }: Props) {
         >
           {userIsAdmin ? "Admin Dashboard" : "My profile"}
         </Link>
-      ) : (
-        <Link href="/signup" className={getLinkClasses(pathname === "/signup")}>
-          Join us
-        </Link>
-      )}
+      ) : null}
     </div>
   );
 }

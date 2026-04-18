@@ -271,7 +271,7 @@ export async function updateTripInstructors(
 export async function createTripApplication(
   tripId: string,
   submission: Record<string, string>,
-  camperId: string,
+  camperId?: string | null,
   paid: boolean = false,
   paymentId?: string | null
 ): Promise<{ error: string | null }> {
@@ -280,7 +280,7 @@ export async function createTripApplication(
     trip_id: tripId,
     submission,
     paid,
-    camper_id: camperId,
+    camper_id: camperId ?? null,
     payment_id: paymentId ?? null,
   });
 
@@ -365,7 +365,7 @@ export async function updateTripApplicationInstallmentProgressByPaymentId(
 export type TripApplication = {
   id: string;
   trip_id: string;
-  camper_id: string;
+  camper_id: string | null;
   submission: Record<string, string>;
   paid: boolean;
   payment_id: string | null;

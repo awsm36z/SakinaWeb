@@ -40,6 +40,49 @@ async function ensureNoExistingApplication(tripId: string, userId: string) {
   return existingApplication;
 }
 
+async function ensureNoExistingApplicationByPaymentId(paymentId: string) {
+  const supabase = await createClient();
+  const { data: existingApplication } = await supabase
+    .from("trip_applications")
+    .select("form_id")
+    .eq("payment_id", paymentId)
+    .maybeSingle();
+
+  return existingApplication;
+}
+
+async function ensureGuestCamperId(submission: Record<string, string>) {
+  const supabase = await createClient();
+  const guestId = crypto.randomUUID();
+  const guestFirstName = submission.first_name?.trim() || "Guest";
+  const guestLastName = submission.last_name?.trim() || "Applicant";
+  const guestEmail = submission.email?.trim().toLowerCase();
+
+  if (!guestEmail) {
+    return { camperId: null, error: "Guest application is missing an email." };
+  }
+
+  const { error } = await supabase.from("profiles").insert({
+    id: guestId,
+    email: guestEmail,
+    name_first: guestFirstName,
+    name_last: guestLastName,
+  });
+
+  if (error) {
+    return { camperId: null, error: error.message };
+  }
+
+  return { camperId: guestId, error: null };
+}
+
+function getConfirmationEmail(
+  submission: Record<string, string>,
+  authenticatedEmail?: string | null
+) {
+  return authenticatedEmail ?? submission.email ?? null;
+}
+
 export async function submitTripApplication(
   tripId: string,
   submission: Record<string, string>,
@@ -47,30 +90,51 @@ export async function submitTripApplication(
 ) {
   const supabase = await createClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
+  let camperId = authError ? null : authData.user?.id ?? null;
 
-  if (authError || !authData.user) {
-    return { error: "You must be logged in to submit." };
+  const existingPaymentApplication =
+    await ensureNoExistingApplicationByPaymentId(paymentId);
+
+  if (existingPaymentApplication) {
+    return { error: null };
   }
 
-  const existingApplication = await ensureNoExistingApplication(
-    tripId,
-    authData.user.id
-  );
+  if (camperId) {
+    const existingApplication = await ensureNoExistingApplication(tripId, camperId);
 
-  if (existingApplication) {
-    return { error: null };
+    if (existingApplication) {
+      return { error: null };
+    }
+  }
+
+  if (!camperId) {
+    const guestCamper = await ensureGuestCamperId(submission);
+
+    if (guestCamper.error || !guestCamper.camperId) {
+      return {
+        error:
+          guestCamper.error ?? "Unable to create a guest application profile.",
+      };
+    }
+
+    camperId = guestCamper.camperId;
   }
 
   const { error } = await createTripApplication(
     tripId,
     { ...submission, payment_plan: "full" },
-    authData.user.id,
+    camperId,
     true,
     paymentId
   );
 
-  if (!error && authData.user.email) {
-    await triggerConfirmationEmail(tripId, authData.user.email, tripId);
+  const confirmationEmail = getConfirmationEmail(
+    submission,
+    authError ? null : authData.user?.email
+  );
+
+  if (!error && confirmationEmail) {
+    await triggerConfirmationEmail(tripId, confirmationEmail, tripId);
   }
 
   return { error };
@@ -83,18 +147,20 @@ export async function submitInstallmentTripApplication(
 ) {
   const supabase = await createClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
+  let camperId = authError ? null : authData.user?.id ?? null;
+  const existingPaymentApplication =
+    await ensureNoExistingApplicationByPaymentId(checkoutSessionId);
 
-  if (authError || !authData.user) {
-    return { error: "You must be logged in to submit." };
+  if (existingPaymentApplication) {
+    return { error: null };
   }
 
-  const existingApplication = await ensureNoExistingApplication(
-    tripId,
-    authData.user.id
-  );
+  if (camperId) {
+    const existingApplication = await ensureNoExistingApplication(tripId, camperId);
 
-  if (existingApplication) {
-    return { error: null };
+    if (existingApplication) {
+      return { error: null };
+    }
   }
 
   const session = await stripe.checkout.sessions.retrieve(checkoutSessionId, {
@@ -109,8 +175,21 @@ export async function submitInstallmentTripApplication(
     return { error: "Installment session does not match this trip." };
   }
 
-  if (session.metadata?.user_id !== authData.user.id) {
+  if (session.metadata?.user_id && camperId && session.metadata.user_id !== camperId) {
     return { error: "Installment session does not belong to this user." };
+  }
+
+  if (!camperId) {
+    const guestCamper = await ensureGuestCamperId(submission);
+
+    if (guestCamper.error || !guestCamper.camperId) {
+      return {
+        error:
+          guestCamper.error ?? "Unable to create a guest application profile.",
+      };
+    }
+
+    camperId = guestCamper.camperId;
   }
 
   const subscriptionId =
@@ -179,13 +258,18 @@ export async function submitInstallmentTripApplication(
       installment_status: "active",
       installment_last_paid_at: new Date().toISOString(),
     },
-    authData.user.id,
+    camperId,
     false,
     subscriptionId ?? session.id
   );
 
-  if (!error && authData.user.email) {
-    await triggerConfirmationEmail(tripId, authData.user.email, tripId);
+  const confirmationEmail = getConfirmationEmail(
+    submission,
+    authError ? null : authData.user?.email
+  );
+
+  if (!error && confirmationEmail) {
+    await triggerConfirmationEmail(tripId, confirmationEmail, tripId);
   }
 
   return { error };
