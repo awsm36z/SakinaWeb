@@ -16,6 +16,24 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 const INSTALLMENT_COUNT = 4;
 
+function readStoredApplication(storageKey: string) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const stored = window.localStorage.getItem(storageKey);
+  if (!stored) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(stored) as Record<string, string>;
+  } catch {
+    window.localStorage.removeItem(storageKey);
+    return null;
+  }
+}
+
 export default function PaymentPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -75,11 +93,17 @@ export default function PaymentPage() {
 
     let isActive = true;
     const createPaymentIntent = async () => {
+      const storedApplication = readStoredApplication(storageKey);
       const response = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: convertToSubcurrency(amount, 100),
+          tripId,
+          firstName: storedApplication?.first_name ?? "",
+          lastName: storedApplication?.last_name ?? "",
+          email: storedApplication?.email ?? "",
+          phone: storedApplication?.phone ?? "",
         }),
       });
 
@@ -101,7 +125,7 @@ export default function PaymentPage() {
     return () => {
       isActive = false;
     };
-  }, [amount]);
+  }, [amount, storageKey, tripId]);
 
   const installmentAmount =
     amount !== null ? amount / INSTALLMENT_COUNT : null;
@@ -118,6 +142,7 @@ export default function PaymentPage() {
 
     setIsLaunchingInstallments(true);
     setCheckoutError(null);
+    const storedApplication = readStoredApplication(storageKey);
 
     const response = await fetch("/api/create-installment-session", {
       method: "POST",
@@ -126,6 +151,10 @@ export default function PaymentPage() {
         amount: convertToSubcurrency(amount, 100),
         tripId,
         tripTitle,
+        firstName: storedApplication?.first_name ?? "",
+        lastName: storedApplication?.last_name ?? "",
+        email: storedApplication?.email ?? "",
+        phone: storedApplication?.phone ?? "",
       }),
     });
 

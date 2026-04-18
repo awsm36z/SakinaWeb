@@ -5,12 +5,21 @@ import { createClient } from "@/lib/supabase/server";
 const INSTALLMENT_COUNT = 4;
 const BILLING_INTERVAL_WEEKS = 2;
 
+function getStringValue(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { amount, tripId, tripTitle } = (await request.json()) as {
+    const { amount, tripId, tripTitle, firstName, lastName, email, phone } =
+      (await request.json()) as {
       amount?: number;
       tripId?: string;
       tripTitle?: string | null;
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
     };
 
     if (!amount || !Number.isInteger(amount) || amount <= 0 || !tripId) {
@@ -32,19 +41,14 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
     const { data: authData, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !authData.user) {
-      return NextResponse.json(
-        { error: "You must be logged in to start installments." },
-        { status: 401 }
-      );
-    }
+    const userId = authError ? null : authData.user?.id ?? null;
+    const contactEmail = getStringValue(email) ?? authData.user?.email ?? undefined;
 
     const installmentAmount = amount / INSTALLMENT_COUNT;
     const origin = request.headers.get("origin") ?? request.nextUrl.origin;
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer_email: authData.user.email ?? undefined,
+      customer_email: contactEmail,
       success_url: `${origin}/application/${tripId}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/application/${tripId}/payment?amount=${
         amount / 100
@@ -74,13 +78,21 @@ export async function POST(request: NextRequest) {
           installment_interval_weeks: String(BILLING_INTERVAL_WEEKS),
           installment_amount: String(installmentAmount),
           full_amount: String(amount),
-          user_id: authData.user.id,
+          user_id: userId ?? "",
+          applicant_first_name: getStringValue(firstName) ?? "",
+          applicant_last_name: getStringValue(lastName) ?? "",
+          applicant_email: contactEmail ?? "",
+          applicant_phone: getStringValue(phone) ?? "",
         },
       },
       metadata: {
         trip_id: tripId,
         payment_plan: "installments",
-        user_id: authData.user.id,
+        user_id: userId ?? "",
+        applicant_first_name: getStringValue(firstName) ?? "",
+        applicant_last_name: getStringValue(lastName) ?? "",
+        applicant_email: contactEmail ?? "",
+        applicant_phone: getStringValue(phone) ?? "",
       },
     });
 

@@ -27,7 +27,11 @@ export default async function TripSubmissionsIndexPage({ params }: Props) {
 
   const applications = await getTripApplications(tripId);
   const camperIds = Array.from(
-    new Set(applications.map((application) => application.camper_id))
+    new Set(
+      applications
+        .map((application) => application.camper_id)
+        .filter((camperId): camperId is string => Boolean(camperId))
+    )
   );
   const { data: camperProfiles } = await supabase
     .from("profiles")
@@ -67,8 +71,14 @@ export default async function TripSubmissionsIndexPage({ params }: Props) {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
-                      {camperNameById.get(application.camper_id) ??
-                        application.camper_id}
+                      {application.camper_id
+                        ? camperNameById.get(application.camper_id) ??
+                          application.camper_id
+                        : [application.submission?.first_name, application.submission?.last_name]
+                            .filter(Boolean)
+                            .join(" ") ||
+                          application.submission?.email ||
+                          "Guest applicant"}
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
                       Submitted {new Date(application.created_at).toLocaleString()}

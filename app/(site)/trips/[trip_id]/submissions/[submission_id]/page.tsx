@@ -31,16 +31,21 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
     redirect(`/trips/${tripId}/submissions`);
   }
 
-  const { data: camperProfiles } = await supabase
-    .from("profiles")
-    .select("id, name_first, name_last")
-    .eq("id", application.camper_id);
-  const camperName =
-    camperProfiles?.[0]
-      ? [camperProfiles[0].name_first, camperProfiles[0].name_last]
-          .filter(Boolean)
-          .join(" ")
-      : application.camper_id;
+  const { data: camperProfiles } = application.camper_id
+    ? await supabase
+        .from("profiles")
+        .select("id, name_first, name_last")
+        .eq("id", application.camper_id)
+    : { data: null };
+  const camperName = camperProfiles?.[0]
+    ? [camperProfiles[0].name_first, camperProfiles[0].name_last]
+        .filter(Boolean)
+        .join(" ")
+    : [application.submission?.first_name, application.submission?.last_name]
+        .filter(Boolean)
+        .join(" ") ||
+      application.submission?.email ||
+      "Guest applicant";
 
   const formatLabel = (value: string) =>
     value
