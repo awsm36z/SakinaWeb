@@ -17,6 +17,13 @@ export async function POST(request: NextRequest) {
         phone?: string;
       };
 
+    if (!amount || !Number.isInteger(amount) || amount <= 0) {
+      return NextResponse.json(
+        { error: "Invalid payment amount." },
+        { status: 400 }
+      );
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency: "usd",
