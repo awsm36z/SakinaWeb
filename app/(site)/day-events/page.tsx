@@ -9,49 +9,52 @@ export default async function DayEventsPage() {
 
   return (
     <main className="brand-shell px-6 md:px-10 lg:px-20">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-12 flex flex-col items-center gap-4 text-center">
-          <p className="brand-kicker">Day Events</p>
-          <h1 className="text-4xl font-bold text-center text-gray-900">
-            Upcoming Day Events
-          </h1>
-          <p className="max-w-2xl text-sm text-gray-600">
-            Single-day gatherings — workshops, talks, and outings. Free to join,
-            with an optional donation ($5–$10) to help cover costs. Looking for
-            longer wilderness expeditions instead? See our{" "}
-            <Link href="/trips" className="brand-link">
-              overnight trips
-            </Link>
-            .
-          </p>
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="brand-kicker">Day Events</p>
+            <h1 className="mt-1 text-2xl md:text-3xl font-bold text-gray-900">
+              Upcoming Day Events
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Short single-day gatherings — free to attend, $5–$10 donation
+              optional. Looking for multi-day expeditions?{" "}
+              <Link href="/trips" className="brand-link">
+                See overnight trips
+              </Link>
+              .
+            </p>
+          </div>
           {canCreate ? (
-            <Link href="/trips/create" className="brand-button px-5 py-2 text-sm">
+            <Link
+              href="/trips/create"
+              className="brand-button px-4 py-2 text-sm"
+            >
               Create Event
             </Link>
           ) : null}
         </div>
 
         {events.length === 0 ? (
-          <div className="brand-panel mx-auto max-w-2xl rounded-2xl p-10 text-center">
-            <p className="brand-kicker mb-3">Nothing scheduled yet</p>
+          <div className="brand-panel rounded-2xl p-6 text-center">
             <p className="text-sm text-gray-600">
-              We haven&apos;t posted any upcoming day events. Check back soon — or{" "}
+              Nothing scheduled yet.{" "}
               <Link href="/contact-us" className="brand-link">
-                get in touch
+                Get in touch
               </Link>{" "}
-              if you&apos;d like to be notified when one goes up.
+              to be notified when the next one goes up.
             </p>
           </div>
         ) : (
-          <div className="grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-col gap-3">
             {events.map((event) => (
               <DayEventCard
                 key={event.id}
                 trip_id={event.trip_id}
                 title={event.title}
-                dates={event.dates}
-                location={event.location ?? "TBD"}
-                bannerImage={event.banner_image ?? ""}
+                startDate={event.start_date}
+                location={event.location}
+                bannerImage={event.banner_image}
                 summary={event.summary}
               />
             ))}

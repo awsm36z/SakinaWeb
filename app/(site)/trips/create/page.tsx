@@ -6,6 +6,7 @@ import { isAdmin } from "@/lib/roles";
 import { updateTripInstructors } from "@/lib/trips";
 import StatusField from "@/app/components/dropdown/status-field";
 import InstructorsEditor from "@/app/components/trips/instructors-editor";
+import CompressingImageInput from "@/app/components/image-upload/compressing-image-input";
 
 async function createTripAction(formData: FormData) {
   "use server";
@@ -52,6 +53,7 @@ async function createTripAction(formData: FormData) {
     tripTypeRaw === "day_event" ? "day_event" : "overnight";
 
   const payload = {
+    id: slug,
     trip_id: tripId,
     slug,
     title: title || "Untitled trip",
@@ -258,12 +260,9 @@ export default async function CreateTripPage() {
               Banner image
               <div className="brand-subtle-block mt-2 p-4">
                 <div className="h-40 w-full rounded-lg bg-gray-200" />
-                <input
-                  type="file"
-                  name="banner_image_file"
-                  accept="image/jpeg,image/png,image/webp,image/avif"
-                  className="mt-3 block w-full text-sm text-gray-600"
-                />
+                <div className="mt-3">
+                  <CompressingImageInput name="banner_image_file" />
+                </div>
               </div>
             </label>
             <StatusField name="status" defaultValue="closed" />

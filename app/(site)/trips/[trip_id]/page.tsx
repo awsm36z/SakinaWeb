@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getTripById, getTripInstructors, isTripInstructor } from "@/lib/trips";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
+import RefundPolicy from "@/app/components/refund-policy/refund-policy";
 
 type Props = {
   params: Promise<{ trip_id: string }>;
@@ -507,6 +508,10 @@ export default async function TripDetailPage({ params }: Props) {
                     View Applications
                   </Link>
                 ) : null}
+              </div>
+
+              <div className="mt-6">
+                <RefundPolicy variant="compact" tone="inverse" />
               </div>
             </div>
           </div>

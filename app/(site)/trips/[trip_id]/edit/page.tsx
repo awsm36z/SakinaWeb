@@ -9,6 +9,7 @@ import {
 } from "@/lib/trips";
 import StatusField from "@/app/components/dropdown/status-field";
 import InstructorsEditor from "@/app/components/trips/instructors-editor";
+import CompressingImageInput from "@/app/components/image-upload/compressing-image-input";
 
 type Props = {
   params: Promise<{ trip_id: string }>;
@@ -270,12 +271,9 @@ export default async function EditTripPage({ params }: Props) {
                 ) : (
                   <div className="h-40 w-full rounded-lg bg-gray-200" />
                 )}
-                <input
-                  type="file"
-                  name="banner_image_file"
-                  accept="image/jpeg,image/png,image/webp,image/avif"
-                  className="mt-3 block w-full text-sm text-gray-600"
-                />
+                <div className="mt-3">
+                  <CompressingImageInput name="banner_image_file" />
+                </div>
               </div>
             </label>
             <StatusField

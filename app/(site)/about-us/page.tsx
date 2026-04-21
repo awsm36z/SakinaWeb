@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import aboutUs from "@/app/(data)/about_us";
 import { createClient } from "@/lib/supabase/server";
+import RefundPolicy from "@/app/components/refund-policy/refund-policy";
 
 export const metadata = {
   title: "About Us — Sakina Wilderness",
@@ -129,6 +130,9 @@ export default async function AboutUsPage() {
             <p className="text-gray-700 leading-relaxed">
               {participant_expectations.ease_and_support}
             </p>
+            <div className="mt-6">
+              <RefundPolicy variant="full" />
+            </div>
           </div>
         </section>
       </div>

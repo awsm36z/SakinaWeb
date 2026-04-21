@@ -322,7 +322,8 @@ const applicationForm: { version: number; sections: Section[] } = {
     {
       id: "rentals",
       title: "Rentals",
-      description: "Let us know if you need gear from us.",
+      description:
+        "Need gear? We've got you covered. Our rental package includes a backpack, sleeping bag, and sleeping pad — everything you need for a comfortable night in the wilderness.",
       fields: [
         {
           name: "needs_rental_gear",
