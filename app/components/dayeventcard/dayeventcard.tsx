@@ -4,60 +4,64 @@ import Image from "next/image";
 type DayEventCardProps = {
   trip_id: string | null;
   title: string | null;
-  dates: string | null;
+  startDate: string | null;
   location: string | null;
   bannerImage: string | null;
   summary: string | null;
 };
 
+function formatDateTile(startDate: string | null) {
+  if (!startDate) return { month: "TBD", day: "—" };
+  const parsed = new Date(`${startDate}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return { month: "TBD", day: "—" };
+  return {
+    month: parsed.toLocaleString("en-US", { month: "short" }).toUpperCase(),
+    day: String(parsed.getDate()),
+  };
+}
+
 export default function DayEventCard({
   trip_id,
   title,
-  dates,
+  startDate,
   location,
   bannerImage,
   summary,
 }: DayEventCardProps) {
+  const { month, day } = formatDateTile(startDate);
+
   return (
     <Link
       href={`/day-events/${trip_id}`}
-      className="brand-card-soft group block rounded-[1.75rem] transition-shadow duration-300 hover:shadow-[0_24px_60px_rgba(67,49,31,0.14)]"
+      className="brand-card-soft group flex items-stretch gap-4 rounded-2xl p-4 transition-shadow duration-200 hover:shadow-[0_12px_32px_rgba(67,49,31,0.10)]"
     >
-      {/* Banner */}
-      <div className="relative h-48 w-full overflow-hidden rounded-t-2xl">
-        <Image
-          src={bannerImage ? bannerImage : "/default-trip-banner.jpg"}
-          alt={title ? title : "Day event banner"}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-
-        {/* Day-event badge — replaces the overnight "status" chip */}
-        <span className="absolute top-4 left-4 text-xs font-semibold px-3 py-1 rounded-full bg-[rgba(184,138,82,0.14)] text-[#8a6439]">
-          Day Event
+      {/* Date tile */}
+      <div className="flex w-20 shrink-0 flex-col items-center justify-center rounded-xl bg-[var(--brand-moss)] px-2 py-3 text-white">
+        <span className="text-[0.65rem] font-semibold uppercase tracking-wider opacity-80">
+          {month}
         </span>
+        <span className="text-2xl font-bold leading-tight">{day}</span>
       </div>
 
       {/* Content */}
-      <div className="flex flex-col p-6">
-        <h3 className="text-2xl font-semibold text-gray-900 transition-colors group-hover:text-[var(--brand-moss)]">
+      <div className="flex min-w-0 flex-1 flex-col justify-center">
+        <h3 className="truncate text-lg font-semibold text-gray-900 transition-colors group-hover:text-[var(--brand-moss)]">
           {title}
         </h3>
-
-        <div className="mt-2 text-sm text-gray-500 space-y-1">
-          <p className="font-medium">{dates}</p>
-          <p>{location}</p>
-          <p className="font-semibold text-[var(--brand-moss)]">
-            Free · optional donation
-          </p>
-        </div>
-
-        <p className="mt-3 text-gray-700 text-sm line-clamp-3">{summary}</p>
-
-        <div className="mt-4 text-sm font-semibold text-[var(--brand-moss)] group-hover:underline">
-          Learn more →
-        </div>
+        <p className="mt-0.5 truncate text-xs text-gray-500">
+          {location ?? "TBD"} · Free · optional donation
+        </p>
+        {summary ? (
+          <p className="mt-1 line-clamp-1 text-sm text-gray-600">{summary}</p>
+        ) : null}
       </div>
+
+      {/* Optional thumbnail — hidden on narrow screens */}
+      {bannerImage ? (
+        <div className="relative hidden h-16 w-24 shrink-0 overflow-hidden rounded-lg sm:block">
+          <Image src={bannerImage} alt="" fill className="object-cover" />
+        </div>
+      ) : null}
     </Link>
   );
 }
