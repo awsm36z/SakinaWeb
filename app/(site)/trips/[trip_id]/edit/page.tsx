@@ -47,6 +47,10 @@ async function updateTripAction(formData: FormData) {
   const datesDisplay =
     startDate && endDate ? `${startDate} - ${endDate}` : null;
 
+  const tripTypeRaw = String(formData.get("trip_type") ?? "overnight");
+  const tripType: "overnight" | "day_event" =
+    tripTypeRaw === "day_event" ? "day_event" : "overnight";
+
   const payload = {
     title: String(formData.get("title") ?? ""),
     tagline: String(formData.get("tagline") ?? "") || null,
@@ -62,6 +66,7 @@ async function updateTripAction(formData: FormData) {
       .split("\n")
       .map((item) => item.trim())
       .filter(Boolean),
+    trip_type: tripType,
     banner_image: null,
   };
 
@@ -152,6 +157,32 @@ export default async function EditTripPage({ params }: Props) {
             name="previous_banner_url"
             value={trip.banner_image ?? ""}
           />
+
+          <fieldset className="brand-subtle-block rounded-xl px-4 py-3">
+            <legend className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
+              Event type
+            </legend>
+            <div className="mt-2 flex flex-col gap-2 text-sm text-gray-700 sm:flex-row sm:gap-6">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="trip_type"
+                  value="overnight"
+                  defaultChecked={trip.trip_type !== "day_event"}
+                />
+                Overnight Trip
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="trip_type"
+                  value="day_event"
+                  defaultChecked={trip.trip_type === "day_event"}
+                />
+                Day Event (free · optional donation)
+              </label>
+            </div>
+          </fieldset>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-gray-700">
