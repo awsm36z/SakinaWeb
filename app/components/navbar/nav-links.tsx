@@ -20,6 +20,7 @@ export default function NavLinks({ userId, userIsAdmin }: Props) {
   const pathname = usePathname();
 
   const isTrips = pathname === "/trips" || pathname.startsWith("/trips/");
+  const isDayEvents = pathname === "/day-events" || pathname.startsWith("/day-events/");
   const isAbout = pathname === "/about-us";
   const isMedia = pathname === "/media";
   const isBadges = pathname === "/badges";
@@ -33,6 +34,10 @@ export default function NavLinks({ userId, userIsAdmin }: Props) {
     <div className="hidden items-center gap-8 md:flex">
       <Link href="/trips" className={getLinkClasses(isTrips)}>
         Trips
+      </Link>
+
+      <Link href="/day-events" className={getLinkClasses(isDayEvents)}>
+        Day Events
       </Link>
 
       <Link href="/about-us" className={getLinkClasses(isAbout)}>

@@ -14,8 +14,12 @@ export default async function TripsPage() {
       <div className="mb-12 flex flex-col items-center gap-4 text-center">
         <p className="brand-kicker">Trips</p>
         <h1 className="text-4xl font-bold text-center text-gray-900">
-          Upcoming Trips
+          Upcoming Overnight Trips
         </h1>
+        <p className="max-w-2xl text-sm text-gray-600">
+          Multi-day wilderness expeditions. Looking for a single-day program instead? See our{" "}
+          <Link href="/day-events" className="brand-link">day events</Link>.
+        </p>
         {canCreate ? (
           <Link
             href="/trips/create"

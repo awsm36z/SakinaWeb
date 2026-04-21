@@ -47,6 +47,10 @@ async function createTripAction(formData: FormData) {
   const datesDisplay =
     startDate && endDate ? `${startDate} - ${endDate}` : null;
 
+  const tripTypeRaw = String(formData.get("trip_type") ?? "overnight");
+  const tripType: "overnight" | "day_event" =
+    tripTypeRaw === "day_event" ? "day_event" : "overnight";
+
   const payload = {
     trip_id: tripId,
     slug,
@@ -71,6 +75,7 @@ async function createTripAction(formData: FormData) {
       .split("\n")
       .map((item) => item.trim())
       .filter(Boolean),
+    trip_type: tripType,
     banner_image: null as string | null,
   };
 
@@ -108,7 +113,7 @@ async function createTripAction(formData: FormData) {
     redirect(`/trips/${tripId}?error=instructors_update_failed`);
   }
 
-  redirect(`/trips/${tripId}`);
+  redirect(tripType === "day_event" ? `/day-events` : `/trips/${tripId}`);
 }
 
 export default async function CreateTripPage() {
@@ -143,13 +148,38 @@ export default async function CreateTripPage() {
     <main className="brand-shell px-6 md:px-10 lg:px-20">
       <div className="brand-panel mx-auto max-w-4xl rounded-2xl p-8">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-gray-900">Create Trip</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Create Trip or Day Event</h1>
           <p className="text-sm text-gray-600">
             This form is restricted to Founders and Admins.
           </p>
         </div>
 
         <form action={createTripAction} className="mt-8 space-y-6">
+          <fieldset className="brand-subtle-block rounded-xl px-4 py-3">
+            <legend className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
+              Event type
+            </legend>
+            <div className="mt-2 flex flex-col gap-2 text-sm text-gray-700 sm:flex-row sm:gap-6">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="trip_type"
+                  value="overnight"
+                  defaultChecked
+                />
+                Overnight Trip
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="radio" name="trip_type" value="day_event" />
+                Day Event (free · optional donation)
+              </label>
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Day events: leave Fee and Max spots blank. They&apos;re free with an
+              optional $5–$10 donation.
+            </p>
+          </fieldset>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-gray-700">
               Title

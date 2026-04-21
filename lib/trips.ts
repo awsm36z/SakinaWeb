@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 
+export type TripType = "overnight" | "day_event";
+
 export type TripRow = {
   id: string;
   trip_id: string;
@@ -17,6 +19,7 @@ export type TripRow = {
   status: "waitlist" | "open" | "full" | "closed" | null;
   summary: string | null;
   highlights: string[] | null;
+  trip_type: TripType;
   spots_left?: number;
   trip_instructors?: TripInstructor[];
 };
@@ -28,15 +31,20 @@ export type TripUpdatePayload = Omit<
   banner_image?: string | null;
   status: "waitlist" | "open" | "full" | "closed";
   highlights: string[];
+  trip_type: TripType;
 };
 
-export async function getTrips(): Promise<TripRow[]> {
+const TRIP_SELECT_COLUMNS =
+  "id, trip_id, slug, title, tagline, dates, start_date, end_date, duration_days, location, fee, max_capacity, banner_image, status, summary, highlights, trip_type";
+
+export async function getTrips(
+  tripType: TripType = "overnight"
+): Promise<TripRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("trips")
-    .select(
-      "id, trip_id, slug, title, tagline, dates, start_date, end_date, duration_days, location, fee, max_capacity, banner_image, status, summary, highlights"
-    )
+    .select(TRIP_SELECT_COLUMNS)
+    .eq("trip_type", tripType)
     .order("start_date", { ascending: true });
 
   if (error || !data) {
@@ -74,13 +82,15 @@ export async function getTrips(): Promise<TripRow[]> {
   });
 }
 
+export async function getDayEvents(): Promise<TripRow[]> {
+  return getTrips("day_event");
+}
+
 export async function getTripById(tripId: string): Promise<TripRow | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("trips")
-    .select(
-      "id, trip_id, slug, title, tagline, dates, start_date, end_date, duration_days, location, fee, max_capacity, banner_image, status, summary, highlights"
-    )
+    .select(TRIP_SELECT_COLUMNS)
     .eq("trip_id", tripId)
     .maybeSingle();
 
