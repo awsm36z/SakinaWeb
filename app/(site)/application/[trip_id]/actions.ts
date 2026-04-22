@@ -2,31 +2,9 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createTripApplication } from "@/lib/trips";
-import { triggerTripRegistrationEmail } from "@/lib/emails";
 import stripe from "@/lib/stripe";
 
-async function triggerConfirmationEmail(
-  tripId: string,
-  userEmail: string,
-  fallbackTripId: string
-) {
-  const supabase = await createClient();
-  const { data: trip } = await supabase
-    .from("trips")
-    .select("title, trip_id")
-    .eq("trip_id", tripId)
-    .maybeSingle();
-
-  const emailResult = await triggerTripRegistrationEmail({
-    recipientEmail: userEmail,
-    tripTitle: trip?.title ?? "your trip",
-    tripId: trip?.trip_id ?? fallbackTripId,
-  });
-
-  if (emailResult.error) {
-    console.error("Trip registration email error:", emailResult.error);
-  }
-}
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 async function ensureNoExistingApplication(tripId: string, userId: string) {
   const supabase = await createClient();
@@ -76,12 +54,13 @@ async function ensureGuestCamperId(submission: Record<string, string>) {
   return { camperId: guestId, error: null };
 }
 
-function getConfirmationEmail(
-  submission: Record<string, string>,
-  authenticatedEmail?: string | null
-) {
-  return authenticatedEmail ?? submission.email ?? null;
-}
+// ─── Actions ─────────────────────────────────────────────────────────────────
+//
+// Email confirmation is handled entirely by the Supabase DB trigger
+// `on_trip_application_insert` which calls the `send-trip-confirmation`
+// edge function asynchronously after every INSERT into trip_applications.
+// That function sends the Resend email and — for guests — generates the
+// account claim token. Nothing email-related belongs here.
 
 export async function submitTripApplication(
   tripId: string,
@@ -100,8 +79,10 @@ export async function submitTripApplication(
   }
 
   if (camperId) {
-    const existingApplication = await ensureNoExistingApplication(tripId, camperId);
-
+    const existingApplication = await ensureNoExistingApplication(
+      tripId,
+      camperId
+    );
     if (existingApplication) {
       return { error: null };
     }
@@ -128,15 +109,6 @@ export async function submitTripApplication(
     paymentId
   );
 
-  const confirmationEmail = getConfirmationEmail(
-    submission,
-    authError ? null : authData.user?.email
-  );
-
-  if (!error && confirmationEmail) {
-    await triggerConfirmationEmail(tripId, confirmationEmail, tripId);
-  }
-
   return { error };
 }
 
@@ -148,6 +120,7 @@ export async function submitInstallmentTripApplication(
   const supabase = await createClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
   let camperId = authError ? null : authData.user?.id ?? null;
+
   const existingPaymentApplication =
     await ensureNoExistingApplicationByPaymentId(checkoutSessionId);
 
@@ -156,8 +129,10 @@ export async function submitInstallmentTripApplication(
   }
 
   if (camperId) {
-    const existingApplication = await ensureNoExistingApplication(tripId, camperId);
-
+    const existingApplication = await ensureNoExistingApplication(
+      tripId,
+      camperId
+    );
     if (existingApplication) {
       return { error: null };
     }
@@ -175,7 +150,11 @@ export async function submitInstallmentTripApplication(
     return { error: "Installment session does not match this trip." };
   }
 
-  if (session.metadata?.user_id && camperId && session.metadata.user_id !== camperId) {
+  if (
+    session.metadata?.user_id &&
+    camperId &&
+    session.metadata.user_id !== camperId
+  ) {
     return { error: "Installment session does not belong to this user." };
   }
 
@@ -218,8 +197,7 @@ export async function submitInstallmentTripApplication(
           from_subscription: subscriptionObject.id,
         });
         const scheduleAnchor =
-          schedule.current_phase?.start_date ??
-          Math.floor(Date.now() / 1000);
+          schedule.current_phase?.start_date ?? Math.floor(Date.now() / 1000);
 
         await stripe.subscriptionSchedules.update(schedule.id, {
           end_behavior: "cancel",
@@ -262,15 +240,6 @@ export async function submitInstallmentTripApplication(
     false,
     subscriptionId ?? session.id
   );
-
-  const confirmationEmail = getConfirmationEmail(
-    submission,
-    authError ? null : authData.user?.email
-  );
-
-  if (!error && confirmationEmail) {
-    await triggerConfirmationEmail(tripId, confirmationEmail, tripId);
-  }
 
   return { error };
 }
