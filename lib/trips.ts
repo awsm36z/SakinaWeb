@@ -11,22 +11,38 @@ export type TripRow = {
   dates: string | null;
   start_date: string | null;
   end_date: string | null;
+  start_time: string | null;
   duration_days: number | null;
   location: string | null;
   fee: number | null;
   max_capacity: number | null;
+  // Optional separate cap for events that loan equipment (e.g. fishing
+  // gear at Catch & Cook). When set, RSVPs that don't bring their own
+  // equipment count against this cap.
+  gear_capacity: number | null;
+  gear_label: string | null;
+  // Free-text hiking distance descriptor surfaced on day-event RSVP forms
+  // ("~5 miles", "12 km", "About 2 hours of walking"). Optional.
+  hiking_distance: string | null;
   banner_image: string | null;
   status: "waitlist" | "open" | "full" | "closed" | null;
   summary: string | null;
   highlights: string[] | null;
   trip_type: TripType;
   spots_left?: number;
+  // Remaining gear loaner slots (only present when gear_capacity is set).
+  gear_spots_left?: number;
   trip_instructors?: TripInstructor[];
 };
 
 export type TripUpdatePayload = Omit<
   TripRow,
-  "id" | "trip_id" | "slug" | "max_capacity" | "spots_left"
+  | "id"
+  | "trip_id"
+  | "slug"
+  | "max_capacity"
+  | "spots_left"
+  | "gear_spots_left"
 > & {
   banner_image?: string | null;
   status: "waitlist" | "open" | "full" | "closed";
@@ -35,7 +51,7 @@ export type TripUpdatePayload = Omit<
 };
 
 const TRIP_SELECT_COLUMNS =
-  "id, trip_id, slug, title, tagline, dates, start_date, end_date, duration_days, location, fee, max_capacity, banner_image, status, summary, highlights, trip_type";
+  "id, trip_id, slug, title, tagline, dates, start_date, end_date, start_time, duration_days, location, fee, max_capacity, gear_capacity, gear_label, hiking_distance, banner_image, status, summary, highlights, trip_type";
 
 export async function getTrips(
   tripType: TripType = "overnight"
@@ -113,9 +129,28 @@ export async function getTripById(tripId: string): Promise<TripRow | null> {
   const trip = data as TripRow;
   const effectiveCapacity = trip.max_capacity ?? 0;
 
+  // For events that loan equipment, count how many paid RSVPs are
+  // borrowing gear (i.e. did NOT check "I have my own equipment").
+  let gearSpotsLeft: number | undefined;
+  if (typeof trip.gear_capacity === "number" && trip.gear_capacity >= 0) {
+    const { count: gearBorrowCount, error: gearError } = await supabase
+      .from("trip_applications")
+      .select("form_id", { count: "exact", head: true })
+      .eq("trip_id", tripId)
+      .eq("paid", true)
+      .not("submission->>has_own_gear", "eq", "true");
+
+    if (gearError) {
+      console.error("getTripById gear count error:", gearError);
+    }
+
+    gearSpotsLeft = Math.max(0, trip.gear_capacity - (gearBorrowCount ?? 0));
+  }
+
   return {
     ...trip,
     spots_left: Math.max(0, effectiveCapacity - paidCount),
+    ...(gearSpotsLeft !== undefined ? { gear_spots_left: gearSpotsLeft } : {}),
   };
 }
 
@@ -397,6 +432,85 @@ export async function getTripApplicationssss(
   }
 
   return data as TripApplication[];
+}
+
+// Bucketed copy for spot availability — we deliberately don't surface
+// exact counts on the public site so a "3 left" doesn't feel scarier
+// than a "5 left" when both should read as urgent.
+export function formatSpotsAvailability(
+  spotsLeft: number | null | undefined,
+  maxCapacity: number | null | undefined
+): string {
+  const left = Math.max(0, spotsLeft ?? 0);
+  const capacity = maxCapacity ?? 0;
+
+  if (capacity <= 0) {
+    // No capacity defined (e.g. day events that don't gate spots).
+    return left > 0 ? "Spots available" : "Open";
+  }
+
+  if (left === 0) return "Full";
+
+  const percentLeft = (left / capacity) * 100;
+
+  if (percentLeft > 50) return "Spots available";
+  if (percentLeft >= 30) return "Few spots left";
+  return "Very few remaining";
+}
+
+export type TripBadgeOffered = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+};
+
+export async function getTripBadgesOffered(
+  tripId: string
+): Promise<TripBadgeOffered[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("trip_badges_offered")
+    .select("badges:badge_id(id, slug, name, description, icon)")
+    .eq("trip_id", tripId);
+
+  if (error || !data) return [];
+
+  return data
+    .map((row) => {
+      const badge = Array.isArray(row.badges) ? row.badges[0] : row.badges;
+      return badge ? (badge as TripBadgeOffered) : null;
+    })
+    .filter((badge): badge is TripBadgeOffered => Boolean(badge));
+}
+
+export async function setTripBadgesOffered(
+  tripId: string,
+  badgeIds: string[]
+): Promise<{ error: string | null }> {
+  const supabase = await createClient();
+
+  const { error: deleteError } = await supabase
+    .from("trip_badges_offered")
+    .delete()
+    .eq("trip_id", tripId);
+
+  if (deleteError) return { error: deleteError.message };
+
+  if (!badgeIds.length) return { error: null };
+
+  const rows = Array.from(new Set(badgeIds)).map((badgeId) => ({
+    trip_id: tripId,
+    badge_id: badgeId,
+  }));
+
+  const { error: insertError } = await supabase
+    .from("trip_badges_offered")
+    .insert(rows);
+
+  if (insertError) return { error: insertError.message };
+  return { error: null };
 }
 
 export async function isTripInstructor(

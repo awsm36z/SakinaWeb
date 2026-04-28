@@ -13,9 +13,11 @@ export type RefundPolicyContent = {
 const refundPolicy: RefundPolicyContent = {
   title: "Refund & Cancellation Policy",
   summary:
-    "TODO: paste a one-sentence summary here (e.g., full refunds up to 30 days before, partial after, weather-cancellation guarantee).",
+    `45 days or more before course start: Cancel and receive a full refund minus a $150 administrative fee.`,
   paragraphs: [
-    "TODO: paste the full refund policy text here. Each array entry renders as its own paragraph — break your text up by paragraph.",
+    `45 days or more before course start: Cancel and receive a full refund minus a $150 administrative fee.\n
+    Less than 45 days before course start: Non-refundable and non-transferable.\n
+    If Tayseer Wilderness cancels: Full refund or transfer to a future course of your choice.`
   ],
   lastUpdated: "2026-04-21",
 };

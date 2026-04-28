@@ -127,24 +127,45 @@ export default function AdminDashboardClient({ profiles, badges }: Props) {
             </p>
           </div>
 
-          <div className="rounded-xl bg-[rgba(240,243,255,0.82)] p-8">
-            <p className="font-inter text-[11px] uppercase tracking-[0.22em] text-[#72796f]">
-              Badge Controls
-            </p>
-            <h2 className="mt-3 font-headline text-2xl text-[var(--brand-ink)]">
-              Create a new badge
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[#5f625b]">
-              Add a badge name, write the short description members will see,
-              and upload the icon used in profiles and award views.
-            </p>
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="brand-button mt-6 px-5 py-2.5 text-sm"
-            >
-              Create badge
-            </button>
+          <div className="flex flex-col gap-4">
+            <div className="rounded-xl bg-[rgba(240,243,255,0.82)] p-8">
+              <p className="font-inter text-[11px] uppercase tracking-[0.22em] text-[#72796f]">
+                Badge Controls
+              </p>
+              <h2 className="mt-3 font-headline text-2xl text-[var(--brand-ink)]">
+                Create a new badge
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-[#5f625b]">
+                Add a badge name, write the short description members will see,
+                and upload the icon used in profiles and award views.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="brand-button mt-6 px-5 py-2.5 text-sm"
+              >
+                Create badge
+              </button>
+            </div>
+
+            <div className="rounded-xl bg-[rgba(240,243,255,0.82)] p-8">
+              <p className="font-inter text-[11px] uppercase tracking-[0.22em] text-[#72796f]">
+                Guest profiles
+              </p>
+              <h2 className="mt-3 font-headline text-2xl text-[var(--brand-ink)]">
+                Add a leader profile
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-[#5f625b]">
+                For guests who won&apos;t register themselves (e.g. spiritual
+                leaders). Adds them to the trip-instructors picker.
+              </p>
+              <Link
+                href="/admin/guest-profiles/new"
+                className="brand-button mt-6 inline-block px-5 py-2.5 text-sm"
+              >
+                Add profile
+              </Link>
+            </div>
           </div>
         </section>
 

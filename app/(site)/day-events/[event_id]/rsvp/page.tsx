@@ -1,48 +1,121 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getTripById } from "@/lib/trips";
+import { createClient } from "@/lib/supabase/server";
+import DayEventRsvpForm from "./rsvp-form";
+import AutoRedirectToConfirm from "./auto-redirect-to-confirm";
 
-type Stored = Record<string, string>;
+type Props = {
+  params: Promise<{ event_id: string }>;
+  searchParams: Promise<{ edit?: string }>;
+};
 
-export default function DayEventRsvpPage() {
-  const params = useParams();
-  const router = useRouter();
-  const tripId = String(params.event_id ?? "");
-  const storageKey = `dayEventRsvp:${tripId}`;
-  const [initial, setInitial] = useState<Stored>({});
+// These four are required server-side before we can skip the form. Name
+// is recoverable from the profile, email comes from auth, the rest only
+// exist on prior trip submissions — we copy them forward so a signed-in
+// user with a previous RSVP can register in basically one click.
+const ALWAYS_REQUIRED = [
+  "first_name",
+  "last_name",
+  "gender",
+  "age",
+  "phone",
+  "email",
+  "medical_notes",
+] as const;
 
-  useEffect(() => {
-    if (!tripId || typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(storageKey);
-    if (!stored) return;
-    try {
-      setInitial(JSON.parse(stored) as Stored);
-    } catch {
-      window.localStorage.removeItem(storageKey);
-    }
-  }, [storageKey, tripId]);
+function hasEverything(prefill: Record<string, string>): boolean {
+  return ALWAYS_REQUIRED.every((field) => Boolean(prefill[field]?.trim()));
+}
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const next: Stored = {};
-    for (const [key, value] of data.entries()) {
-      if (typeof value === "string") next[key] = value;
-    }
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(storageKey, JSON.stringify(next));
-    }
-    router.push(`/day-events/${tripId}/rsvp/confirm`);
+async function loadSignedInPrefill(): Promise<{
+  prefill: Record<string, string>;
+  signedIn: boolean;
+  displayName: string | null;
+}> {
+  const supabase = await createClient();
+  const { data: authData, error } = await supabase.auth.getUser();
+  if (error || !authData.user) {
+    return { prefill: {}, signedIn: false, displayName: null };
   }
+
+  const userId = authData.user.id;
+  const userEmail = authData.user.email ?? "";
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("name_first, name_last, Gender, email")
+    .eq("id", userId)
+    .maybeSingle();
+
+  // Pull the most recent submission for any trip — past answers for
+  // age/phone/medical_notes (and gender if not on the profile) get
+  // copied forward.
+  const { data: lastApplication } = await supabase
+    .from("trip_applications")
+    .select("submission")
+    .eq("camper_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const lastSubmission =
+    (lastApplication?.submission as Record<string, string> | null) ?? {};
+
+  // Profile fields take precedence over the submission for
+  // identity-shaped data (name, email, gender) — they're the canonical
+  // source. Submission fills in everything else.
+  const prefill: Record<string, string> = {
+    ...lastSubmission,
+    first_name: profile?.name_first ?? lastSubmission.first_name ?? "",
+    last_name: profile?.name_last ?? lastSubmission.last_name ?? "",
+    email: userEmail || profile?.email || lastSubmission.email || "",
+  };
+
+  // The profile Gender enum uses Title Case ("Male" / "Female" /
+  // "Prefer Not to Say") but the form's <select> uses short codes.
+  const profileGender = profile?.Gender;
+  if (typeof profileGender === "string" && profileGender) {
+    const normalized = profileGender.toLowerCase();
+    if (normalized === "male") prefill.gender = "male";
+    else if (normalized === "female") prefill.gender = "female";
+    else if (normalized.startsWith("prefer")) prefill.gender = "na";
+  }
+
+  // Don't let stale gear-opt-in checkboxes leak between trips.
+  delete prefill.has_own_gear;
+
+  const displayName =
+    [profile?.name_first, profile?.name_last].filter(Boolean).join(" ") ||
+    userEmail ||
+    null;
+
+  return { prefill, signedIn: true, displayName };
+}
+
+export default async function DayEventRsvpPage({
+  params,
+  searchParams,
+}: Props) {
+  const { event_id: eventId } = await params;
+  const { edit } = await searchParams;
+  const event = await getTripById(eventId);
+
+  if (!event || event.trip_type !== "day_event") {
+    notFound();
+  }
+
+  const { prefill, signedIn, displayName } = await loadSignedInPrefill();
+  const everything = hasEverything(prefill);
+  const wantsEdit = edit === "1";
+  const fastPath = signedIn && everything && !wantsEdit;
 
   return (
     <main className="brand-shell px-6 md:px-10 lg:px-20">
       <div className="mx-auto max-w-2xl">
         <div className="mb-4">
           <Link
-            href={`/day-events/${tripId}`}
+            href={`/day-events/${eventId}`}
             className="brand-link text-sm"
           >
             ← Back to event
@@ -52,122 +125,34 @@ export default function DayEventRsvpPage() {
         <article className="brand-panel rounded-2xl p-6 md:p-8">
           <p className="brand-kicker">RSVP</p>
           <h1 className="mt-1 text-2xl md:text-3xl font-bold text-gray-900">
-            Sign up for this day event
+            {fastPath
+              ? `Welcome back${displayName ? `, ${displayName}` : ""}`
+              : "Sign up for this day event"}
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            A few quick details so we know who&apos;s coming. This event involves
-            moderate hiking — expect to walk about 5 miles in one day. If you
-            have any medical concerns please list them below.
+            {fastPath
+              ? "We have your info on file — heading straight to the donation step."
+              : signedIn
+                ? "We've prefilled what we know — just fill in anything that's missing."
+                : "A few quick details so we know who's coming."}
+            {!fastPath && event.hiking_distance?.trim()
+              ? ` This event involves moderate hiking — expect about ${event.hiking_distance.trim()} in one day.`
+              : ""}
+            {!fastPath ? " If you have any medical concerns please list them below." : ""}
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-medium text-gray-700">
-                First name
-                <input
-                  name="first_name"
-                  required
-                  defaultValue={initial.first_name}
-                  className="brand-input mt-2 px-3 py-2 text-sm"
-                />
-              </label>
-              <label className="block text-sm font-medium text-gray-700">
-                Last name
-                <input
-                  name="last_name"
-                  required
-                  defaultValue={initial.last_name}
-                  className="brand-input mt-2 px-3 py-2 text-sm"
-                />
-              </label>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              <label className="block text-sm font-medium text-gray-700">
-                Gender
-                <select
-                  name="gender"
-                  required
-                  defaultValue={initial.gender ?? ""}
-                  className="brand-input mt-2 px-3 py-2 text-sm"
-                >
-                  <option value="" disabled>
-                    Select
-                  </option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="na">Prefer not to say</option>
-                </select>
-              </label>
-              <label className="block text-sm font-medium text-gray-700">
-                Age
-                <input
-                  name="age"
-                  type="number"
-                  min={0}
-                  max={120}
-                  required
-                  defaultValue={initial.age}
-                  className="brand-input mt-2 px-3 py-2 text-sm"
-                />
-              </label>
-              <label className="block text-sm font-medium text-gray-700">
-                Phone
-                <input
-                  name="phone"
-                  type="tel"
-                  required
-                  defaultValue={initial.phone}
-                  className="brand-input mt-2 px-3 py-2 text-sm"
-                />
-              </label>
-            </div>
-
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-              <input
-                name="email"
-                type="email"
-                required
-                defaultValue={initial.email}
-                className="brand-input mt-2 px-3 py-2 text-sm"
-              />
-              <span className="mt-1 block text-xs font-normal text-gray-500">
-                We&apos;ll send your confirmation here.
-              </span>
-            </label>
-
-            <label className="block text-sm font-medium text-gray-700">
-              Medical concerns
-              <textarea
-                name="medical_notes"
-                rows={4}
-                defaultValue={initial.medical_notes}
-                placeholder="List any medical concerns (injuries, allergies, conditions). Write “None” if nothing applies."
-                className="brand-input mt-2 px-3 py-2 text-sm"
-                required
-              />
-              <span className="mt-1 block text-xs font-normal text-gray-500">
-                This event involves ~5 miles of moderate hiking. Let us know
-                anything we should be aware of.
-              </span>
-            </label>
-
-            <div className="flex items-center justify-between pt-2">
-              <Link
-                href={`/day-events/${tripId}`}
-                className="brand-button-secondary px-4 py-2 text-sm"
-              >
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                className="brand-button rounded-xl px-5 py-2 text-sm"
-              >
-                Continue
-              </button>
-            </div>
-          </form>
+          {fastPath ? (
+            <AutoRedirectToConfirm tripId={eventId} prefill={prefill} />
+          ) : (
+            <DayEventRsvpForm
+              tripId={eventId}
+              gearCapacity={event.gear_capacity ?? null}
+              gearLabel={event.gear_label ?? null}
+              gearSpotsLeft={event.gear_spots_left ?? null}
+              hikingDistance={event.hiking_distance ?? null}
+              serverPrefill={prefill}
+            />
+          )}
         </article>
       </div>
     </main>

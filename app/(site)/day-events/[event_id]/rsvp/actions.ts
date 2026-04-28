@@ -2,8 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createTripApplication } from "@/lib/trips";
-import { triggerTripRegistrationEmail } from "@/lib/emails";
-import { createClaimToken } from "@/lib/account-claim";
+
+// Email confirmation + guest claim-token minting happen entirely in the
+// `send-trip-confirmation` edge function, which is called by the
+// `on_trip_application_insert` DB trigger after every INSERT into
+// trip_applications. Nothing email-related belongs here.
 
 async function ensureGuestCamperId(submission: Record<string, string>) {
   const supabase = await createClient();
@@ -51,29 +54,37 @@ async function ensureNoExistingApplication(tripId: string, userId: string) {
   return data;
 }
 
-async function triggerConfirmationEmail(
+// Returns null if there's room (or this event doesn't loan gear), or an
+// error message if the loaner pool is full. Only applies when the RSVP
+// did NOT tick "I have my own gear".
+async function checkGearCapacity(
   tripId: string,
-  recipientEmail: string,
-  claimUrl: string | null
-) {
+  hasOwnGear: boolean
+): Promise<string | null> {
+  if (hasOwnGear) return null;
+
   const supabase = await createClient();
   const { data: trip } = await supabase
     .from("trips")
-    .select("title, trip_id")
+    .select("gear_capacity, gear_label")
     .eq("trip_id", tripId)
     .maybeSingle();
 
-  const emailResult = await triggerTripRegistrationEmail({
-    recipientEmail,
-    tripTitle: trip?.title ?? "your day event",
-    tripId: trip?.trip_id ?? tripId,
-    claimUrl,
-    detailPath: "day-events",
-  });
+  const capacity = trip?.gear_capacity;
+  if (typeof capacity !== "number") return null;
 
-  if (emailResult.error) {
-    console.error("Day-event RSVP email error:", emailResult.error);
+  const { count } = await supabase
+    .from("trip_applications")
+    .select("form_id", { count: "exact", head: true })
+    .eq("trip_id", tripId)
+    .eq("paid", true)
+    .not("submission->>has_own_gear", "eq", "true");
+
+  if ((count ?? 0) >= capacity) {
+    const label = trip?.gear_label ?? "I have my own equipment";
+    return `Loaner spots are full. Please re-submit and tick "${label}" so you can still join.`;
   }
+  return null;
 }
 
 type SubmitInput = {
@@ -110,7 +121,14 @@ export async function submitDayEventRsvp({
     }
   }
 
-  let createdGuestProfile = false;
+  // For events that loan equipment, enforce the loaner cap before we
+  // create any rows or charge any donation.
+  const hasOwnGear = submission.has_own_gear === "true";
+  const gearError = await checkGearCapacity(tripId, hasOwnGear);
+  if (gearError) {
+    return { error: gearError };
+  }
+
   if (!camperId) {
     const guest = await ensureGuestCamperId(submission);
     if (guest.error || !guest.camperId) {
@@ -119,7 +137,6 @@ export async function submitDayEventRsvp({
       };
     }
     camperId = guest.camperId;
-    createdGuestProfile = true;
   }
 
   const enrichedSubmission: Record<string, string> = {
@@ -137,32 +154,5 @@ export async function submitDayEventRsvp({
     paymentId ?? null
   );
 
-  if (error) {
-    return { error };
-  }
-
-  const recipient =
-    (authError ? null : authData.user?.email) ?? submission.email ?? null;
-
-  // Only mint a claim token for brand-new guest profiles — authed users
-  // already have accounts, and repeat guests (same email, different trip)
-  // shouldn't accumulate tokens.
-  let claimUrl: string | null = null;
-  if (createdGuestProfile && recipient) {
-    const claim = await createClaimToken({
-      profileId: camperId,
-      email: recipient,
-    });
-    if (claim.error) {
-      console.error("Day-event RSVP claim token error:", claim.error);
-    } else {
-      claimUrl = claim.claimUrl ?? null;
-    }
-  }
-
-  if (recipient) {
-    await triggerConfirmationEmail(tripId, recipient, claimUrl);
-  }
-
-  return { error: null };
+  return { error };
 }

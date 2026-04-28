@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTripById } from "@/lib/trips";
+import { getTripBadgesOffered, getTripById, isTripInstructor } from "@/lib/trips";
 import { isAdmin } from "@/lib/roles";
 import { createClient } from "@/lib/supabase/server";
 import DayEventRsvpCta from "@/app/components/dayeventcard/rsvp-cta";
+import BadgesOfferedCard from "@/app/components/trips/badges-offered-card";
 
 type Props = {
   params: Promise<{ event_id: string }>;
@@ -34,6 +35,8 @@ export default async function DayEventDetailPage({
     notFound();
   }
 
+  const badgesOffered = await getTripBadgesOffered(event.trip_id);
+
   const { month, day } = formatDateTile(event.start_date);
   const showRsvpSuccess = rsvp === "success";
 
@@ -52,10 +55,20 @@ export default async function DayEventDetailPage({
         .maybeSingle()
     : { data: null };
   const hasAppliedAuth = Boolean(existingApplication);
+  const canViewRsvps =
+    canEdit || (userId ? await isTripInstructor(event.trip_id, userId) : false);
+
+  const hasBadges = badgesOffered.length > 0;
 
   return (
     <main className="brand-shell px-6 md:px-10 lg:px-20">
-      <div className="mx-auto max-w-3xl">
+      <div
+        className={
+          hasBadges
+            ? "mx-auto max-w-5xl"
+            : "mx-auto max-w-3xl"
+        }
+      >
         <div className="mb-4">
           <Link href="/day-events" className="brand-link text-sm">
             ← All day events
@@ -69,7 +82,20 @@ export default async function DayEventDetailPage({
           </div>
         ) : null}
 
-        <article className="brand-panel rounded-2xl p-6 md:p-8">
+        <div
+          className={
+            hasBadges
+              ? "flex flex-col gap-6 md:flex-row md:items-start"
+              : ""
+          }
+        >
+          <article
+            className={
+              hasBadges
+                ? "brand-panel min-w-0 flex-1 rounded-2xl p-6 md:p-8"
+                : "brand-panel rounded-2xl p-6 md:p-8"
+            }
+          >
           {/* Header — date tile + title side by side */}
           <div className="flex items-start gap-5">
             <div className="flex w-20 shrink-0 flex-col items-center justify-center rounded-xl bg-[var(--brand-moss)] px-2 py-3 text-white">
@@ -93,7 +119,13 @@ export default async function DayEventDetailPage({
 
           {/* Inline meta row */}
           <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600">
-            <span>{event.dates ?? "TBD"}</span>
+            <span>{event.dates ?? event.start_date ?? "TBD"}</span>
+            {event.start_time ? (
+              <>
+                <span className="text-gray-300">·</span>
+                <span>{event.start_time}</span>
+              </>
+            ) : null}
             <span className="text-gray-300">·</span>
             <span>{event.location ?? "TBD"}</span>
             <span className="text-gray-300">·</span>
@@ -101,6 +133,18 @@ export default async function DayEventDetailPage({
               Free · optional donation ($5–$10)
             </span>
           </div>
+
+          {typeof event.gear_capacity === "number" ? (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[rgba(47,93,80,0.24)] bg-[rgba(47,93,80,0.06)] px-3 py-1 text-xs font-medium text-[var(--brand-moss)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand-moss)]" />
+              {(event.gear_spots_left ?? event.gear_capacity)} of{" "}
+              {event.gear_capacity} loaner spot
+              {event.gear_capacity === 1 ? "" : "s"} left ·{" "}
+              {event.gear_label
+                ? `tick "${event.gear_label}" if you'll bring your own`
+                : "first come, first served"}
+            </div>
+          ) : null}
 
           {/* Slim banner strip (only if an image exists) */}
           {event.banner_image ? (
@@ -140,6 +184,14 @@ export default async function DayEventDetailPage({
               tripId={event.trip_id}
               hasAppliedAuth={hasAppliedAuth}
             />
+            {canViewRsvps ? (
+              <Link
+                href={`/day-events/${event.trip_id}/rsvps`}
+                className="brand-button-secondary rounded-xl px-5 py-2 text-sm"
+              >
+                View RSVPs
+              </Link>
+            ) : null}
             {canEdit ? (
               <Link
                 href={`/trips/${event.trip_id}/edit`}
@@ -149,7 +201,18 @@ export default async function DayEventDetailPage({
               </Link>
             ) : null}
           </div>
-        </article>
+          </article>
+
+          {hasBadges ? (
+            <aside className="md:w-72 md:shrink-0">
+              <BadgesOfferedCard
+                badges={badgesOffered}
+                variant="sidebar"
+                signedIn={Boolean(userId)}
+              />
+            </aside>
+          ) : null}
+        </div>
       </div>
     </main>
   );

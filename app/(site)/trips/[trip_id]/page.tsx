@@ -1,10 +1,17 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getTripById, getTripInstructors, isTripInstructor } from "@/lib/trips";
+import {
+  formatSpotsAvailability,
+  getTripBadgesOffered,
+  getTripById,
+  getTripInstructors,
+  isTripInstructor,
+} from "@/lib/trips";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
 import RefundPolicy from "@/app/components/refund-policy/refund-policy";
+import BadgesOfferedCard from "@/app/components/trips/badges-offered-card";
 
 type Props = {
   params: Promise<{ trip_id: string }>;
@@ -78,7 +85,12 @@ export default async function TripDetailPage({ params }: Props) {
 
   if (!trip) notFound();
 
+  const badgesOffered = await getTripBadgesOffered(trip.trip_id);
   const highlights = trip.highlights ?? [];
+  const spotsAvailability = formatSpotsAvailability(
+    trip.spots_left ?? 0,
+    trip.max_capacity ?? null
+  );
   const isClosed = trip.status?.toLowerCase() === "closed";
   const hasApplied = Boolean(existingApplication);
   const heroImage = trip.banner_image || "/Adams Thumbnail.jpg";
@@ -137,7 +149,7 @@ export default async function TripDetailPage({ params }: Props) {
       description:
         highlights[1] ??
         "The descent and integration phase, carrying the experience back into everyday life with clarity and gratitude.",
-      tags: [formatMoney(trip.fee), `${trip.spots_left ?? 0} spots left`],
+      tags: [formatMoney(trip.fee), spotsAvailability],
     },
   ];
 
@@ -420,6 +432,14 @@ export default async function TripDetailPage({ params }: Props) {
         </div>
 
         <aside className="space-y-8">
+          {badgesOffered.length > 0 ? (
+            <BadgesOfferedCard
+              badges={badgesOffered}
+              variant="sidebar"
+              signedIn={Boolean(userId)}
+            />
+          ) : null}
+
           <div className="rounded-[1.5rem] bg-[rgba(240,243,255,0.82)] p-8">
             <h2 className="font-headline mb-8 text-3xl text-[var(--brand-moss)]">
               Expedition Facts
@@ -434,7 +454,7 @@ export default async function TripDetailPage({ params }: Props) {
                 ],
                 ["Status", formatStatus(trip.status ?? null)],
                 ["Fee", formatMoney(trip.fee)],
-                ["Spots Left", String(trip.spots_left ?? 0)],
+                ["Availability", spotsAvailability],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-xl bg-white px-4 py-3">
                   <p className="font-inter text-[11px] uppercase tracking-[0.2em] text-[var(--brand-moss)]">
@@ -463,7 +483,7 @@ export default async function TripDetailPage({ params }: Props) {
                 Ready for this trip?
               </h2>
               <p className="mt-4 text-lg text-emerald-100/80">
-                {trip.spots_left ?? 0} spots remain for this expedition.
+                {spotsAvailability} for this expedition.
               </p>
               <div className="mt-8 space-y-3">
                 {isClosed ? (
