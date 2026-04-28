@@ -44,6 +44,7 @@ export default async function TripsPage() {
             summary={trip.summary}
             status={trip.status ?? "closed"}
             spotsLeft={trip.spots_left ?? 0}
+            maxCapacity={trip.max_capacity ?? null}
           />
         ))}
       </div>

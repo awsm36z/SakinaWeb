@@ -165,7 +165,10 @@ export default function DayEventRsvpConfirmPage() {
       <div className="mx-auto max-w-2xl">
         <div className="mb-4">
           <Link
-            href={`/day-events/${tripId}/rsvp`}
+            // ?edit=1 forces the form view even for signed-in users with
+            // a complete prefill — otherwise they'd be auto-redirected
+            // back here and never get to update anything.
+            href={`/day-events/${tripId}/rsvp?edit=1`}
             className="brand-link text-sm"
           >
             ← Back to form

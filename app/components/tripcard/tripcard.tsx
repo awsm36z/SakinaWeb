@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { formatSpotsAvailability } from "@/lib/trips";
 
 type TripCardProps = {
   trip_id: string | null;
@@ -12,6 +13,7 @@ type TripCardProps = {
   summary: string | null;
   status: "waitlist" | "open" | "full" | "closed";
   spotsLeft: number;
+  maxCapacity: number | null;
 };
 
 export default function TripCard({
@@ -25,7 +27,9 @@ export default function TripCard({
   summary,
   status,
   spotsLeft,
+  maxCapacity,
 }: TripCardProps) {
+  const availability = formatSpotsAvailability(spotsLeft, maxCapacity);
   return (
     <Link
       href={`/trips/${trip_id}`}
@@ -78,7 +82,7 @@ export default function TripCard({
           <p>
             {durationDays} days · {difficulty}
           </p>
-          <p className="font-semibold text-[var(--brand-moss)]">Spots left: {spotsLeft}</p>
+          <p className="font-semibold text-[var(--brand-moss)]">{availability}</p>
         </div>
 
         {/* Short description */}

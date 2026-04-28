@@ -3,9 +3,10 @@ import { randomUUID } from "crypto";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
-import { updateTripInstructors } from "@/lib/trips";
+import { setTripBadgesOffered, updateTripInstructors } from "@/lib/trips";
 import StatusField from "@/app/components/dropdown/status-field";
 import InstructorsEditor from "@/app/components/trips/instructors-editor";
+import BadgesOfferedEditor from "@/app/components/trips/badges-offered-editor";
 import CompressingImageInput from "@/app/components/image-upload/compressing-image-input";
 
 async function createTripAction(formData: FormData) {
@@ -52,6 +53,11 @@ async function createTripAction(formData: FormData) {
   const tripType: "overnight" | "day_event" =
     tripTypeRaw === "day_event" ? "day_event" : "overnight";
 
+  const startTimeRaw = String(formData.get("start_time") ?? "").trim();
+  const gearCapacityRaw = String(formData.get("gear_capacity") ?? "").trim();
+  const gearLabelRaw = String(formData.get("gear_label") ?? "").trim();
+  const hikingDistanceRaw = String(formData.get("hiking_distance") ?? "").trim();
+
   const payload = {
     id: slug,
     trip_id: tripId,
@@ -61,12 +67,22 @@ async function createTripAction(formData: FormData) {
     dates: datesDisplay,
     start_date: startDate,
     end_date: endDate,
+    start_time: startTimeRaw || null,
     duration_days: durationDays,
     location: String(formData.get("location") ?? "") || null,
     fee: formData.get("fee") ? Number(formData.get("fee")) : null,
     max_capacity: formData.get("max_capacity")
       ? Number(formData.get("max_capacity"))
       : null,
+    gear_capacity:
+      tripType === "day_event" && gearCapacityRaw
+        ? Number(gearCapacityRaw)
+        : null,
+    gear_label:
+      tripType === "day_event" && gearCapacityRaw && gearLabelRaw
+        ? gearLabelRaw
+        : null,
+    hiking_distance: hikingDistanceRaw || null,
     status: String(formData.get("status") ?? "closed") as
       | "closed"
       | "waitlist"
@@ -115,6 +131,14 @@ async function createTripAction(formData: FormData) {
     redirect(`/trips/${tripId}?error=instructors_update_failed`);
   }
 
+  const badgeOfferedIds = formData.getAll("badge_offered_ids").map(String);
+  if (badgeOfferedIds.length) {
+    const badgesResult = await setTripBadgesOffered(tripId, badgeOfferedIds);
+    if (badgesResult.error) {
+      redirect(`/trips/${tripId}?error=badges_offered_update_failed`);
+    }
+  }
+
   redirect(tripType === "day_event" ? `/day-events` : `/trips/${tripId}`);
 }
 
@@ -144,6 +168,17 @@ export default async function CreateTripPage() {
     value: profile.id,
     avatar_url: profile.avatar_url ?? null,
     capacity: profile.Capacity ?? null,
+  }));
+
+  const { data: allBadges } = await supabase
+    .from("badges")
+    .select("id, name, description, icon")
+    .order("name", { ascending: true });
+  const badgeOptions = (allBadges ?? []).map((badge) => ({
+    id: badge.id as string,
+    name: (badge.name as string) ?? "Untitled badge",
+    description: (badge.description as string | null) ?? null,
+    icon: (badge.icon as string | null) ?? null,
   }));
 
   return (
@@ -246,14 +281,62 @@ export default async function CreateTripPage() {
                 className="mt-2 w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"
               />
             </label>
-            <div className="brand-subtle-block px-4 py-3 text-sm text-gray-600">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
-                Auto fields
-              </p>
-              <p className="mt-2">Dates: TBD</p>
-              <p className="mt-1">Duration: TBD</p>
-            </div>
+            <label className="block text-sm font-medium text-gray-700">
+              Start time
+              <input
+                name="start_time"
+                placeholder="e.g. Post-Maghrib · 2pm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
+              />
+              <span className="mt-1 block text-xs font-normal text-gray-500">
+                Optional. Day events can use prayer-time references.
+              </span>
+            </label>
           </div>
+
+          <label className="block text-sm font-medium text-gray-700">
+            Hiking distance
+            <input
+              name="hiking_distance"
+              placeholder="e.g. ~5 miles · 12 km · About 2 hours of walking"
+              className="brand-input mt-2 px-3 py-2 text-sm"
+            />
+            <span className="mt-1 block text-xs font-normal text-gray-500">
+              Optional. Shown on the RSVP form so attendees know what to
+              expect — leave blank to hide the line.
+            </span>
+          </label>
+
+          <fieldset className="brand-subtle-block rounded-xl px-4 py-3">
+            <legend className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
+              Gear loaning (day events only)
+            </legend>
+            <p className="mt-1 text-xs text-gray-500">
+              Use this for events that loan equipment (e.g. fishing rods at
+              Catch &amp; Cook). Leave both fields blank to skip the
+              &quot;I have my own gear&quot; checkbox on the RSVP form.
+            </p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Gear capacity
+                <input
+                  type="number"
+                  name="gear_capacity"
+                  min="0"
+                  step="1"
+                  className="brand-input mt-2 px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="block text-sm font-medium text-gray-700">
+                Gear-opt-out label
+                <input
+                  name="gear_label"
+                  placeholder="e.g. I have my own fishing equipment"
+                  className="brand-input mt-2 px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+          </fieldset>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-gray-700">
@@ -287,6 +370,8 @@ export default async function CreateTripPage() {
           </label>
 
           <InstructorsEditor options={instructorOptions} initialAssignments={[]} />
+
+          <BadgesOfferedEditor options={badgeOptions} initialBadgeIds={[]} />
 
           <div className="flex items-center gap-4">
             <button

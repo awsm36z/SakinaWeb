@@ -53,6 +53,7 @@ export default async function DayEventsPage() {
                 trip_id={event.trip_id}
                 title={event.title}
                 startDate={event.start_date}
+                startTime={event.start_time}
                 location={event.location}
                 bannerImage={event.banner_image}
                 summary={event.summary}

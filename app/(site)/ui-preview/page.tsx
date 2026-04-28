@@ -378,6 +378,7 @@ export default function UIPreviewPage() {
               summary="A production preview of the current trip card with status badge, image treatment, metadata, and hover behavior."
               status="open"
               spotsLeft={4}
+              maxCapacity={12}
             />
           </div>
         </Section>

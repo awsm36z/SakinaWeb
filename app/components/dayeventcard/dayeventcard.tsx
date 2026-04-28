@@ -5,6 +5,7 @@ type DayEventCardProps = {
   trip_id: string | null;
   title: string | null;
   startDate: string | null;
+  startTime?: string | null;
   location: string | null;
   bannerImage: string | null;
   summary: string | null;
@@ -24,11 +25,17 @@ export default function DayEventCard({
   trip_id,
   title,
   startDate,
+  startTime,
   location,
   bannerImage,
   summary,
 }: DayEventCardProps) {
   const { month, day } = formatDateTile(startDate);
+  const metaParts = [
+    location ?? "TBD",
+    startTime?.trim() ? startTime : null,
+    "Free · optional donation",
+  ].filter(Boolean) as string[];
 
   return (
     <Link
@@ -49,7 +56,7 @@ export default function DayEventCard({
           {title}
         </h3>
         <p className="mt-0.5 truncate text-xs text-gray-500">
-          {location ?? "TBD"} · Free · optional donation
+          {metaParts.join(" · ")}
         </p>
         {summary ? (
           <p className="mt-1 line-clamp-1 text-sm text-gray-600">{summary}</p>

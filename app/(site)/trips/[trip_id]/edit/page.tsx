@@ -2,13 +2,16 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
 import {
+  getTripBadgesOffered,
   getTripById,
   getTripInstructors,
+  setTripBadgesOffered,
   updateTripById,
   updateTripInstructors,
 } from "@/lib/trips";
 import StatusField from "@/app/components/dropdown/status-field";
 import InstructorsEditor from "@/app/components/trips/instructors-editor";
+import BadgesOfferedEditor from "@/app/components/trips/badges-offered-editor";
 import CompressingImageInput from "@/app/components/image-upload/compressing-image-input";
 
 type Props = {
@@ -52,15 +55,30 @@ async function updateTripAction(formData: FormData) {
   const tripType: "overnight" | "day_event" =
     tripTypeRaw === "day_event" ? "day_event" : "overnight";
 
+  const startTimeRaw = String(formData.get("start_time") ?? "").trim();
+  const gearCapacityRaw = String(formData.get("gear_capacity") ?? "").trim();
+  const gearLabelRaw = String(formData.get("gear_label") ?? "").trim();
+  const hikingDistanceRaw = String(formData.get("hiking_distance") ?? "").trim();
+
   const payload = {
     title: String(formData.get("title") ?? ""),
     tagline: String(formData.get("tagline") ?? "") || null,
     dates: datesDisplay,
     start_date: startDate,
     end_date: endDate,
+    start_time: startTimeRaw || null,
     duration_days: durationDays,
     location: String(formData.get("location") ?? "") || null,
     fee: formData.get("fee") ? Number(formData.get("fee")) : null,
+    gear_capacity:
+      tripType === "day_event" && gearCapacityRaw
+        ? Number(gearCapacityRaw)
+        : null,
+    gear_label:
+      tripType === "day_event" && gearCapacityRaw && gearLabelRaw
+        ? gearLabelRaw
+        : null,
+    hiking_distance: hikingDistanceRaw || null,
     status: (String(formData.get("status") ?? "closed") as "closed" | "waitlist" | "open" | "full"),
     summary: String(formData.get("summary") ?? "") || null,
     highlights: String(formData.get("highlights") ?? "")
@@ -96,7 +114,17 @@ async function updateTripAction(formData: FormData) {
     redirect(`/trips/${tripId}?error=instructors_update_failed`);
   }
 
-  redirect(`/trips/${tripId}`);
+  const badgeOfferedIds = formData.getAll("badge_offered_ids").map(String);
+  const badgesResult = await setTripBadgesOffered(tripId, badgeOfferedIds);
+  if (badgesResult.error) {
+    redirect(`/trips/${tripId}?error=badges_offered_update_failed`);
+  }
+
+  // Day events live under a different URL prefix and have their own UI;
+  // bounce admins back to the right detail page after save.
+  redirect(
+    tripType === "day_event" ? `/day-events/${tripId}` : `/trips/${tripId}`
+  );
 }
 
 export default async function EditTripPage({ params }: Props) {
@@ -116,9 +144,21 @@ export default async function EditTripPage({ params }: Props) {
 
   const trip = await getTripById(tripId);
   const instructors = await getTripInstructors(tripId);
+  const badgesOffered = await getTripBadgesOffered(tripId);
   if (!trip) {
     redirect("/trips");
   }
+
+  const { data: allBadges } = await supabase
+    .from("badges")
+    .select("id, name, description, icon")
+    .order("name", { ascending: true });
+  const badgeOptions = (allBadges ?? []).map((badge) => ({
+    id: badge.id as string,
+    name: (badge.name as string) ?? "Untitled badge",
+    description: (badge.description as string | null) ?? null,
+    icon: (badge.icon as string | null) ?? null,
+  }));
 
   const { data: profiles } = await supabase
     .from("profiles")
@@ -245,18 +285,66 @@ export default async function EditTripPage({ params }: Props) {
                 className="brand-input mt-2 px-3 py-2 text-sm"
               />
             </label>
-            <div className="brand-subtle-block px-4 py-3 text-sm text-gray-600">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
-                Auto fields
-              </p>
-              <p className="mt-2">
-                Dates: {trip.dates ?? "TBD"}
-              </p>
-              <p className="mt-1">
-                Duration: {trip.duration_days ?? 0} days
-              </p>
-            </div>
+            <label className="block text-sm font-medium text-gray-700">
+              Start time
+              <input
+                name="start_time"
+                defaultValue={trip.start_time ?? ""}
+                placeholder="e.g. Post-Maghrib · 2pm"
+                className="brand-input mt-2 px-3 py-2 text-sm"
+              />
+              <span className="mt-1 block text-xs font-normal text-gray-500">
+                Optional. Day events can use prayer-time references.
+              </span>
+            </label>
           </div>
+
+          <label className="block text-sm font-medium text-gray-700">
+            Hiking distance
+            <input
+              name="hiking_distance"
+              defaultValue={trip.hiking_distance ?? ""}
+              placeholder="e.g. ~5 miles · 12 km · About 2 hours of walking"
+              className="brand-input mt-2 px-3 py-2 text-sm"
+            />
+            <span className="mt-1 block text-xs font-normal text-gray-500">
+              Optional. Shown on the RSVP form so attendees know what to
+              expect — leave blank to hide the line.
+            </span>
+          </label>
+
+          <fieldset className="brand-subtle-block rounded-xl px-4 py-3">
+            <legend className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
+              Gear loaning (day events only)
+            </legend>
+            <p className="mt-1 text-xs text-gray-500">
+              Use this for events that loan equipment (e.g. fishing rods at
+              Catch &amp; Cook). Leave both fields blank to skip the
+              &quot;I have my own gear&quot; checkbox on the RSVP form.
+            </p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Gear capacity
+                <input
+                  type="number"
+                  name="gear_capacity"
+                  min="0"
+                  step="1"
+                  defaultValue={trip.gear_capacity ?? ""}
+                  className="brand-input mt-2 px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="block text-sm font-medium text-gray-700">
+                Gear-opt-out label
+                <input
+                  name="gear_label"
+                  defaultValue={trip.gear_label ?? ""}
+                  placeholder="e.g. I have my own fishing equipment"
+                  className="brand-input mt-2 px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+          </fieldset>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-gray-700">
@@ -307,6 +395,11 @@ export default async function EditTripPage({ params }: Props) {
             initialAssignments={initialAssignments}
           />
 
+          <BadgesOfferedEditor
+            options={badgeOptions}
+            initialBadgeIds={badgesOffered.map((badge) => badge.id)}
+          />
+
           <div className="flex items-center gap-4">
             <button
               type="submit"
@@ -315,7 +408,11 @@ export default async function EditTripPage({ params }: Props) {
               Save changes
             </button>
             <a
-              href={`/trips/${trip.trip_id}`}
+              href={
+                trip.trip_type === "day_event"
+                  ? `/day-events/${trip.trip_id}`
+                  : `/trips/${trip.trip_id}`
+              }
               className="brand-link text-sm"
             >
               Cancel
