@@ -4,6 +4,7 @@ import { getTripById } from "@/lib/trips";
 import { createClient } from "@/lib/supabase/server";
 import DayEventRsvpForm from "./rsvp-form";
 import AutoRedirectToConfirm from "./auto-redirect-to-confirm";
+import GenderRestrictionChip from "@/app/components/trips/gender-restriction-chip";
 
 type Props = {
   params: Promise<{ event_id: string }>;
@@ -129,6 +130,14 @@ export default async function DayEventRsvpPage({
               ? `Welcome back${displayName ? `, ${displayName}` : ""}`
               : "Sign up for this day event"}
           </h1>
+          {event.gender_restriction !== "open" ? (
+            <div className="mt-3">
+              <GenderRestrictionChip
+                value={event.gender_restriction}
+                variant="banner"
+              />
+            </div>
+          ) : null}
           <p className="mt-2 text-sm text-gray-600">
             {fastPath
               ? "We have your info on file — heading straight to the donation step."

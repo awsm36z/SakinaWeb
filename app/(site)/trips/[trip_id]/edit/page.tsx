@@ -59,6 +59,11 @@ async function updateTripAction(formData: FormData) {
   const gearCapacityRaw = String(formData.get("gear_capacity") ?? "").trim();
   const gearLabelRaw = String(formData.get("gear_label") ?? "").trim();
   const hikingDistanceRaw = String(formData.get("hiking_distance") ?? "").trim();
+  const genderRestrictionRaw = String(formData.get("gender_restriction") ?? "open");
+  const genderRestriction: "open" | "men_only" | "women_only" =
+    genderRestrictionRaw === "men_only" || genderRestrictionRaw === "women_only"
+      ? genderRestrictionRaw
+      : "open";
 
   const payload = {
     title: String(formData.get("title") ?? ""),
@@ -79,6 +84,7 @@ async function updateTripAction(formData: FormData) {
         ? gearLabelRaw
         : null,
     hiking_distance: hikingDistanceRaw || null,
+    gender_restriction: genderRestriction,
     status: (String(formData.get("status") ?? "closed") as "closed" | "waitlist" | "open" | "full"),
     summary: String(formData.get("summary") ?? "") || null,
     highlights: String(formData.get("highlights") ?? "")
@@ -223,6 +229,48 @@ export default async function EditTripPage({ params }: Props) {
                 Day Event (free · optional donation)
               </label>
             </div>
+          </fieldset>
+
+          <fieldset className="brand-subtle-block rounded-xl px-4 py-3">
+            <legend className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-moss)]">
+              Who can attend
+            </legend>
+            <div className="mt-2 flex flex-col gap-2 text-sm text-gray-700 sm:flex-row sm:gap-6">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="gender_restriction"
+                  value="open"
+                  defaultChecked={
+                    trip.gender_restriction !== "men_only" &&
+                    trip.gender_restriction !== "women_only"
+                  }
+                />
+                Open to All Event
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="gender_restriction"
+                  value="men_only"
+                  defaultChecked={trip.gender_restriction === "men_only"}
+                />
+                Brother&apos;s Event
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="gender_restriction"
+                  value="women_only"
+                  defaultChecked={trip.gender_restriction === "women_only"}
+                />
+                Sister&apos;s Event
+              </label>
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Shown as a chip on listing cards, the detail page, and the
+              RSVP form.
+            </p>
           </fieldset>
 
           <div className="grid gap-4 sm:grid-cols-2">
