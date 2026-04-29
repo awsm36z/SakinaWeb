@@ -6,6 +6,7 @@ import { isAdmin } from "@/lib/roles";
 import { createClient } from "@/lib/supabase/server";
 import DayEventRsvpCta from "@/app/components/dayeventcard/rsvp-cta";
 import BadgesOfferedCard from "@/app/components/trips/badges-offered-card";
+import GenderRestrictionChip from "@/app/components/trips/gender-restriction-chip";
 
 type Props = {
   params: Promise<{ event_id: string }>;
@@ -105,7 +106,13 @@ export default async function DayEventDetailPage({
               <span className="text-2xl font-bold leading-tight">{day}</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="brand-kicker">Day Event</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="brand-kicker">Day Event</p>
+                <GenderRestrictionChip
+                  value={event.gender_restriction}
+                  alwaysShow
+                />
+              </div>
               <h1 className="mt-1 text-2xl md:text-3xl font-bold text-gray-900">
                 {event.title}
               </h1>

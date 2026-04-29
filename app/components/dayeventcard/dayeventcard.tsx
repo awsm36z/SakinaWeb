@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import GenderRestrictionChip from "@/app/components/trips/gender-restriction-chip";
 
 type DayEventCardProps = {
   trip_id: string | null;
@@ -9,6 +10,7 @@ type DayEventCardProps = {
   location: string | null;
   bannerImage: string | null;
   summary: string | null;
+  genderRestriction?: string | null;
 };
 
 function formatDateTile(startDate: string | null) {
@@ -29,6 +31,7 @@ export default function DayEventCard({
   location,
   bannerImage,
   summary,
+  genderRestriction,
 }: DayEventCardProps) {
   const { month, day } = formatDateTile(startDate);
   const metaParts = [
@@ -52,9 +55,12 @@ export default function DayEventCard({
 
       {/* Content */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
-        <h3 className="truncate text-lg font-semibold text-gray-900 transition-colors group-hover:text-[var(--brand-moss)]">
-          {title}
-        </h3>
+        <div className="flex items-start gap-2">
+          <h3 className="min-w-0 flex-1 truncate text-lg font-semibold text-gray-900 transition-colors group-hover:text-[var(--brand-moss)]">
+            {title}
+          </h3>
+          <GenderRestrictionChip value={genderRestriction} alwaysShow />
+        </div>
         <p className="mt-0.5 truncate text-xs text-gray-500">
           {metaParts.join(" · ")}
         </p>

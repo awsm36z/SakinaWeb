@@ -2,6 +2,52 @@ import { createClient } from "@/lib/supabase/server";
 
 export type TripType = "overnight" | "day_event";
 
+export type GenderRestriction = "open" | "men_only" | "women_only";
+
+// Pretty label + Tailwind chip class for each restriction. Centralized
+// here so the listing card, detail headers, and RSVP banners all stay
+// in sync. Wording deliberately uses Sakina's "brothers / sisters"
+// framing so the chip reads as an invitation rather than an exclusion.
+export function formatGenderRestriction(value: string | null | undefined): {
+  label: string;
+  // Short sentence used in the RSVP banner. Speaks to who the event
+  // is for in a warm, faith-aligned tone.
+  bannerSentence: string;
+  isRestricted: boolean;
+  chipClass: string;
+} {
+  switch (value) {
+    case "men_only":
+      return {
+        label: "Brother's Event",
+        bannerSentence: "This is a Brother's Event.",
+        isRestricted: true,
+        chipClass:
+          "bg-[rgba(47,93,80,0.12)] text-[var(--brand-moss)] border-[rgba(47,93,80,0.28)]",
+      };
+    case "women_only":
+      return {
+        label: "Sister's Event",
+        bannerSentence: "This is a Sister's Event.",
+        isRestricted: true,
+        chipClass:
+          "bg-[rgba(184,82,138,0.12)] text-[#8a3964] border-[rgba(184,82,138,0.28)]",
+      };
+    default:
+      return {
+        label: "Open to All Event",
+        bannerSentence: "Everyone is welcome at this event.",
+        isRestricted: false,
+        // Muted navy that sits alongside the moss-green and rose chips
+        // without screaming for attention. Pulled toward the warm side
+        // of navy so it lives in the same earthy palette as the rest
+        // of the site.
+        chipClass:
+          "bg-[rgba(30,58,95,0.10)] text-[#1e3a5f] border-[rgba(30,58,95,0.26)]",
+      };
+  }
+}
+
 export type TripRow = {
   id: string;
   trip_id: string;
@@ -24,6 +70,7 @@ export type TripRow = {
   // Free-text hiking distance descriptor surfaced on day-event RSVP forms
   // ("~5 miles", "12 km", "About 2 hours of walking"). Optional.
   hiking_distance: string | null;
+  gender_restriction: GenderRestriction;
   banner_image: string | null;
   status: "waitlist" | "open" | "full" | "closed" | null;
   summary: string | null;
@@ -51,7 +98,7 @@ export type TripUpdatePayload = Omit<
 };
 
 const TRIP_SELECT_COLUMNS =
-  "id, trip_id, slug, title, tagline, dates, start_date, end_date, start_time, duration_days, location, fee, max_capacity, gear_capacity, gear_label, hiking_distance, banner_image, status, summary, highlights, trip_type";
+  "id, trip_id, slug, title, tagline, dates, start_date, end_date, start_time, duration_days, location, fee, max_capacity, gear_capacity, gear_label, hiking_distance, gender_restriction, banner_image, status, summary, highlights, trip_type";
 
 export async function getTrips(
   tripType: TripType = "overnight"

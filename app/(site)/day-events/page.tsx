@@ -57,6 +57,7 @@ export default async function DayEventsPage() {
                 location={event.location}
                 bannerImage={event.banner_image}
                 summary={event.summary}
+                genderRestriction={event.gender_restriction}
               />
             ))}
           </div>

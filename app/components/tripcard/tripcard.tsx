@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatSpotsAvailability } from "@/lib/trips";
+import GenderRestrictionChip from "@/app/components/trips/gender-restriction-chip";
 
 type TripCardProps = {
   trip_id: string | null;
@@ -14,6 +15,7 @@ type TripCardProps = {
   status: "waitlist" | "open" | "full" | "closed";
   spotsLeft: number;
   maxCapacity: number | null;
+  genderRestriction?: string | null;
 };
 
 export default function TripCard({
@@ -28,6 +30,7 @@ export default function TripCard({
   status,
   spotsLeft,
   maxCapacity,
+  genderRestriction,
 }: TripCardProps) {
   const availability = formatSpotsAvailability(spotsLeft, maxCapacity);
   return (
@@ -71,9 +74,12 @@ export default function TripCard({
 
       {/* Content */}
       <div className="flex flex-col p-6">
-        <h3 className="text-2xl font-semibold text-gray-900 transition-colors group-hover:text-[var(--brand-moss)]">
-          {title}
-        </h3>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-2xl font-semibold text-gray-900 transition-colors group-hover:text-[var(--brand-moss)]">
+            {title}
+          </h3>
+          <GenderRestrictionChip value={genderRestriction} alwaysShow />
+        </div>
 
         {/* Meta */}
         <div className="mt-2 text-sm text-gray-500 space-y-1">

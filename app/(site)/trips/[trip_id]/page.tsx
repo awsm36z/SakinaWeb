@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
 import RefundPolicy from "@/app/components/refund-policy/refund-policy";
 import BadgesOfferedCard from "@/app/components/trips/badges-offered-card";
+import GenderRestrictionChip from "@/app/components/trips/gender-restriction-chip";
 
 type Props = {
   params: Promise<{ trip_id: string }>;
@@ -195,6 +196,10 @@ export default async function TripDetailPage({ params }: Props) {
             <span className="rounded-full bg-white/18 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[rgba(255,244,228,0.9)] backdrop-blur-md shadow-[0_10px_30px_rgba(16,24,21,0.14)]">
               {trip.duration_days != null ? `${trip.duration_days} days` : "Duration TBA"}
             </span>
+            <GenderRestrictionChip
+              value={trip.gender_restriction}
+              alwaysShow
+            />
           </div>
         </div>
 
