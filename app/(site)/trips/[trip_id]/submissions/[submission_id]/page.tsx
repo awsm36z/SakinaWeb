@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
 import { getTripApplicationById, isTripInstructor } from "@/lib/trips";
+import DeleteApplicationButton from "@/app/components/trips/delete-application-button";
 
 type Props = {
   params: Promise<{ trip_id: string; submission_id: string }>;
@@ -132,9 +133,19 @@ export default async function TripSubmissionDetailPage({ params }: Props) {
                 Submitted {new Date(application.created_at).toLocaleString()}
               </p>
             </div>
-              <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
-                {application.paid ? "Paid" : "Unpaid"}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
+                  {application.paid ? "Paid" : "Unpaid"}
+                </span>
+                <DeleteApplicationButton
+                  tripId={tripId}
+                  formId={application.form_id}
+                  applicantName={camperName}
+                  wasPaid={Boolean(application.paid)}
+                  variant="full"
+                  redirectTo={`/trips/${tripId}/submissions`}
+                />
+              </div>
             </div>
 
           {installmentProgress ? (

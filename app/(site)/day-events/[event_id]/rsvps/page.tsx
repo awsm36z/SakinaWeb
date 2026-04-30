@@ -7,6 +7,7 @@ import {
   getTripById,
   isTripInstructor,
 } from "@/lib/trips";
+import DeleteApplicationButton from "@/app/components/trips/delete-application-button";
 
 type Props = {
   params: Promise<{ event_id: string }>;
@@ -109,6 +110,7 @@ export default async function DayEventRsvpsPage({ params }: Props) {
                     <th className="px-4 py-3">Gear</th>
                   ) : null}
                   <th className="px-4 py-3">Submitted</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
@@ -165,6 +167,14 @@ export default async function DayEventRsvpsPage({ params }: Props) {
                       ) : null}
                       <td className="px-4 py-3 text-xs text-gray-500">
                         {new Date(application.created_at).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <DeleteApplicationButton
+                          tripId={eventId}
+                          formId={application.form_id}
+                          applicantName={displayName}
+                          wasPaid={Boolean(application.paid)}
+                        />
                       </td>
                     </tr>
                   );
