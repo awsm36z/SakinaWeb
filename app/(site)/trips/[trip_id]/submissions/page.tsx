@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/roles";
 import { getTripApplications, isTripInstructor } from "@/lib/trips";
+import DeleteApplicationButton from "@/app/components/trips/delete-application-button";
 
 type Props = {
   params: Promise<{ trip_id: string }>;
@@ -62,42 +63,63 @@ export default async function TripSubmissionsIndexPage({ params }: Props) {
 
         {applications.length ? (
           <div className="grid gap-4 md:grid-cols-2">
-            {applications.map((application) => (
-              <Link
-                key={application.form_id}
-                href={`/trips/${tripId}/submissions/${application.form_id}`}
-                className="brand-panel rounded-2xl p-6 transition hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(67,49,31,0.12)]"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {application.camper_id
-                        ? camperNameById.get(application.camper_id) ??
-                          application.camper_id
-                        : [application.submission?.first_name, application.submission?.last_name]
-                            .filter(Boolean)
-                            .join(" ") ||
-                          application.submission?.email ||
-                          "Guest applicant"}
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      Submitted {new Date(application.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
-                      {application.paid ? "Paid" : "Unpaid"}
-                    </span>
-                    {application.submission?.payment_plan === "installments" ? (
-                      <span className="rounded-full bg-[rgba(47,93,80,0.1)] px-3 py-1 text-xs font-semibold text-[var(--brand-moss)]">
-                        Installments {application.submission?.installment_paid_count ?? "0"}/
-                        {application.submission?.installment_target_count ?? "4"}
+            {applications.map((application) => {
+              const displayName = application.camper_id
+                ? camperNameById.get(application.camper_id) ??
+                  application.camper_id
+                : [
+                    application.submission?.first_name,
+                    application.submission?.last_name,
+                  ]
+                    .filter(Boolean)
+                    .join(" ") ||
+                  application.submission?.email ||
+                  "Guest applicant";
+
+              return (
+                <div
+                  key={application.form_id}
+                  className="brand-panel rounded-2xl p-6 transition hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(67,49,31,0.12)]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <Link
+                      href={`/trips/${tripId}/submissions/${application.form_id}`}
+                      className="min-w-0 flex-1"
+                    >
+                      <p className="text-sm font-semibold text-gray-900">
+                        {displayName}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Submitted{" "}
+                        {new Date(application.created_at).toLocaleString()}
+                      </p>
+                    </Link>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="rounded-full bg-[rgba(255,250,241,0.78)] px-3 py-1 text-xs font-semibold text-gray-700">
+                        {application.paid ? "Paid" : "Unpaid"}
                       </span>
-                    ) : null}
+                      {application.submission?.payment_plan === "installments" ? (
+                        <span className="rounded-full bg-[rgba(47,93,80,0.1)] px-3 py-1 text-xs font-semibold text-[var(--brand-moss)]">
+                          Installments{" "}
+                          {application.submission?.installment_paid_count ?? "0"}
+                          /
+                          {application.submission?.installment_target_count ?? "4"}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-end">
+                    <DeleteApplicationButton
+                      tripId={tripId}
+                      formId={application.form_id}
+                      applicantName={displayName}
+                      wasPaid={Boolean(application.paid)}
+                    />
                   </div>
                 </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-[var(--border-soft)] bg-[rgba(255,250,241,0.72)] p-8 text-center text-sm text-gray-500">
