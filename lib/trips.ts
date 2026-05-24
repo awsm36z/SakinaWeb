@@ -149,6 +149,39 @@ export async function getDayEvents(): Promise<TripRow[]> {
   return getTrips("day_event");
 }
 
+/**
+ * Returns day events split into upcoming and past buckets.
+ *
+ * - "past"     → start_date is before today (date-only comparison, UTC)
+ * - "upcoming" → start_date is today or in the future, OR start_date is null
+ *
+ * Closed events are flagged via the `status` field — callers decide whether
+ * to show them based on the viewer's role.
+ */
+export async function getDayEventsBucketed(): Promise<{
+  upcoming: TripRow[];
+  past: TripRow[];
+}> {
+  const all = await getTrips("day_event");
+  const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+
+  const upcoming: TripRow[] = [];
+  const past: TripRow[] = [];
+
+  for (const event of all) {
+    if (event.start_date && event.start_date < todayStr) {
+      past.push(event);
+    } else {
+      upcoming.push(event);
+    }
+  }
+
+  // Past events: most recent first
+  past.sort((a, b) => (b.start_date ?? "").localeCompare(a.start_date ?? ""));
+
+  return { upcoming, past };
+}
+
 export async function getTripById(tripId: string): Promise<TripRow | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
