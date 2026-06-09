@@ -47,32 +47,20 @@ export async function updateUserProfile(
 ) {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    // Strip undefined keys so we don't accidentally overwrite columns
+    // (e.g. Capacity should only be sent when the caller explicitly sets it)
+    const cleanPayload = Object.fromEntries(
+        Object.entries(payload).filter(([, v]) => v !== undefined)
+    );
+
+    const { error } = await supabase
         .from("profiles")
-        .update(payload)
-        .eq("id", userId)
-        .select()
-        .maybeSingle();
+        .update(cleanPayload)
+        .eq("id", userId);
 
     if (error) {
         throw new Error(`Error updating user profile: ${error.message}`);
     }
-
-    if (data) {
-        return data;
-    }
-
-    const { data: inserted, error: insertError } = await supabase
-        .from("profiles")
-        .insert({ id: userId, ...payload })
-        .select()
-        .single();
-
-    if (insertError) {
-        throw new Error(`Error creating user profile: ${insertError.message}`);
-    }
-
-    return inserted;
 }
 
 //upload the profile image to the storage and update the profile image URL in the user profile
