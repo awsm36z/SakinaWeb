@@ -148,7 +148,7 @@ export default function ApplicationPage() {
             setIsSubmitting(false);
             setSubmitError(null);
             const rentalFee =
-              mergedResponses.needs_rental_gear === "yes" ? 100 : 0;
+              mergedResponses.needs_rental_gear === "yes" ? 75 : 0;
             const totalAmount =
               tripCost !== null ? tripCost + rentalFee : null;
             const paymentPath =

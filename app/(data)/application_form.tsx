@@ -333,7 +333,7 @@ const applicationForm: { version: number; sections: Section[] } = {
           options: [
             {
               label:
-                "Yes, I would like to rent a backpack, sleeping bag, and sleeping pad for an additional fee. (+$100)",
+                "Yes, I would like to rent a backpack, sleeping bag, and sleeping pad for an additional fee. (+$75)",
               value: "yes",
             },
             {

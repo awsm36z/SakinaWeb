@@ -65,6 +65,8 @@ async function updateTripAction(formData: FormData) {
       ? genderRestrictionRaw
       : "open";
 
+  const maxCapacityRaw = String(formData.get("max_capacity") ?? "").trim();
+
   const payload = {
     title: String(formData.get("title") ?? ""),
     tagline: String(formData.get("tagline") ?? "") || null,
@@ -75,6 +77,7 @@ async function updateTripAction(formData: FormData) {
     duration_days: durationDays,
     location: String(formData.get("location") ?? "") || null,
     fee: formData.get("fee") ? Number(formData.get("fee")) : null,
+    max_capacity: maxCapacityRaw ? Number(maxCapacityRaw) : null,
     gear_capacity:
       tripType === "day_event" && gearCapacityRaw
         ? Number(gearCapacityRaw)
@@ -311,6 +314,24 @@ export default async function EditTripPage({ params }: Props) {
                 defaultValue={trip.fee ?? ""}
                 className="brand-input mt-2 px-3 py-2 text-sm"
               />
+            </label>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Max capacity
+              <input
+                type="number"
+                name="max_capacity"
+                min="1"
+                step="1"
+                defaultValue={trip.max_capacity ?? ""}
+                placeholder="e.g. 12"
+                className="brand-input mt-2 px-3 py-2 text-sm"
+              />
+              <span className="mt-1 block text-xs font-normal text-gray-500">
+                Leave blank for unlimited signups.
+              </span>
             </label>
           </div>
 
