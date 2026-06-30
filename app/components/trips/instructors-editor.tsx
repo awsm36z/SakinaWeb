@@ -20,11 +20,16 @@ type Props = {
   initialAssignments: Assignment[];
 };
 
+// IMPORTANT: each value must match a label in the Postgres `capacities`
+// enum exactly — the trip_instructors.instructor_role column is typed
+// against it. Earlier we had "Spiritual Guide" and "Guest Expert" here,
+// which caused the edit-page server action to throw
+// `invalid input value for enum capacities` when picked.
 const roleOptions: DropdownOption[] = [
   { label: "Trip Lead", value: "Trip Lead" },
   { label: "Assistant Trip Lead", value: "Assistant Trip Lead" },
-  { label: "Spiritual Guide", value: "Spiritual Guide" },
-  { label: "Guest Expert", value: "Guest Expert" },
+  { label: "Wilderness Leader", value: "Wilderness Leader" },
+  { label: "Spiritual Leader", value: "Spiritual Leader" },
 ];
 
 export default function InstructorsEditor({ options, initialAssignments }: Props) {
