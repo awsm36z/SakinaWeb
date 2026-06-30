@@ -25,7 +25,11 @@ export default function SignupPage() {
     }
 
     const supabase = createClient();
-    const redirectTo = `${window.location.origin}/login`;
+    // Route the confirmation-email click through our /auth/callback
+    // server route so it can exchange the PKCE `?code=` (or verify
+    // `?token_hash=`) for a real session. Without this the email click
+    // 404s. `next` tells the callback where to send them after login.
+    const redirectTo = `${window.location.origin}/auth/callback?next=/account`;
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
